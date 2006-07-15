@@ -1,0 +1,21 @@
+
+As I haven't done anything clever yet, to run the tests for the
+AutoAdmin plugin, you need auto_admin_test, which is a simple Rails
+application (just a database, and matching models with assocations).
+
+  http://trebex.net/~matthew/auto-admin-0.0/auto-admin-test-0.0.tar.gz
+
+The database used is a manual Rails-ification of Pagila [1], from CVS,
+as at whenever I went looking for one. The database dump almost
+certainly contains PostgreSQL-specific stuff; I'll address that at some
+point, and quite possibly move to an SQLite database, for that matter.
+
+Once that application is set up, you need to install the plugin, and
+then run the tests from the installed plugin's directory:
+
+  ruby test/all_test.rb ../../..
+
+Suggestions to make this work better are very welcome. :)
+
+  [1] Pagila: http://pgfoundry.org/projects/dbsamples/
+

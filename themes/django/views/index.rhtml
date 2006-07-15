@@ -1,0 +1,37 @@
+<%
+@body_class = 'dashboard'
+@content_class = 'colMS'
+@title = 'Site administration'
+
+AutoAdmin::AutoAdminConfiguration.grouped_objects do |group, group_objects|
+%><div class="module">
+  <h2><%=h group %></h2>
+  <table>
+<%
+group_objects.each do |obj|
+  o = obj.name.underscore
+  %>
+    <tr><th><%= link_to o.humanize, list_page_for(o) %></th>
+      <td><%= link_to 'Add', { :model => o, :action => 'edit' }, { :class => 'addlink' } %></td>
+      <td><%= link_to 'Change', list_page_for( o ), { :class => 'changelink' } %></td></tr>
+<% end %>
+  </table>
+</div>
+<%
+end
+
+content_for 'related' do
+  if has_history? %>
+    <div class="module" id="recent-actions-module">
+        <h2>Recent Actions</h2>
+        <h3>My Actions</h3>
+            <ul class="actionlist">
+<% @history_items.each do |record| -%>
+              <li class="<%= history_link_class( record ) %>"><%= history_link( record ) %><br />
+                <span class="mini quiet"><%=h human_model(record.model) %></span></li>
+<% end -%>
+            </ul>
+    </div>
+<% end
+end %>
+

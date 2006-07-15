@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-us" xml:lang="en-us">
+<head>
+  <title><%=h @title ? "#{@title} | " : '' %><%=h site.name %></title>
+  <%= tag("link", { "rel" => "Stylesheet", "type" => "text/css", "media" => "screen", "href" => url_for( :action => 'asset', :path => 'stylesheets/auto_admin.css', :escape => false ) } ) %>
+</head>
+
+<body class="<%=h @body_class %>">
+
+<!-- Container -->
+<div id="container">
+
+    
+    <!-- Header -->
+    <div id="header">
+        <div id="branding">
+        
+<h1 id="site-name"><%= link_to site.name, :controller => 'auto_admin' %></h1>
+<h2 id="site-url"><%= link_to h( site.short_url ), site.url %></h2>
+
+        </div>
+        
+        <% if user %>
+        <div id="user-tools">Welcome, <strong><%=h user.to_label %></strong>. <br /><!--<a href="../../password_change/">Change password</a> / --><%= link_to 'Log out', :controller => 'auto_admin', :action => 'logout' %></div>
+        <% end %>
+        
+        
+        <br class="clear" />
+    </div>
+    <!-- END Header -->
+    <% unless defined?( @no_crumbs ) && @no_crumbs %>
+    <div class="breadcrumbs"><%=
+      if params[:model]
+        crumbs = [link_to( 'Home', :controller => 'auto_admin')]
+        if params[:action] == 'list'
+          crumbs << h( params[:model].pluralize.humanize )
+        else
+          crumbs << link_to( h( params[:model].pluralize.humanize ), { :controller => 'auto_admin', :model => params[:model], :action => 'list', :id => nil } )
+          crumbs << h( (defined?( @object ) && @object.respond_to?( :to_label )) ? @object.to_label : @title )
+        end
+      else
+        crumbs = ['Home']
+      end
+      crumbs = @breadcrumbs || crumbs
+      crumbs.join( ' &rsaquo; ') %></div>
+    <% end %>
+    
+    <%= "<ul class=\"messagelist\">" + [flash[:notice]].flatten.map {|note| "<li>#{h(note)}</li>" }.join( '' ) + "</ul>" if flash[:notice] %>
+
+    <!-- Content -->
+    <div id="content" class="<%=h @content_class %>">
+        
+        <h1><%=h @title %></h1>
+        
+<div id="content-main">
+
+<% if defined?( @tools ) && !@tools.nil? && !@tools.empty? %>
+<ul class="object-tools"><%= @tools.map{ |html| "<li>#{html}</li>" }.join( '' ) %></ul>
+<% end %>
+
+<%= "<p class=\"errornote\">" + [flash[:warning]].flatten.map {|note| h(note) }.join( '<br />' ) + "</p>" if flash[:warning] %>
+
+<%= @content_for_layout %>
+</div>
+
+<% if defined? @content_for_related %>
+<div id="content-related">
+  <%= @content_for_related %>
+</div>
+<% end %>
+        
+        <br class="clear" />
+    </div>
+    <!-- END Content -->
+
+    <div id="footer"></div>
+</div>
+<!-- END Container -->
+
+</body>
+</html>

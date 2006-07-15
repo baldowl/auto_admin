@@ -1,0 +1,83 @@
+<%
+@body_class = 'change-list'
+@content_class = 'flex'
+@title = "Select #{human_model.downcase} to change"
+@tools = [link_to( "Add #{human_model.downcase}", { :model => params[:model], :action => 'edit' }, { :class => 'addlink' } )]
+%>
+<div class="module filtered" id="changelist">
+
+<% if model.searchable? %>
+<div id="toolbar"><form id="changelist-search" action="" method="get">
+  <label><%= image_tag 'auto_admin/icon_searchbox', :alt => 'Search for:', :title => 'Search' %></label>
+  <%= text_field_tag :search, params[:search], :id => 'searchbar', :size => 40 %>
+  <%= submit_tag 'Go', :name => nil %>
+  <%= current_list_page_as_fields :search %>
+</form></div>
+<script type="text/javascript">document.getElementById("searchbar").focus();</script>
+<% end %>
+
+
+<!--
+<div class="xfull">
+<ul class="toplinks">
+
+
+<li> <a href="?q=tes&amp;ot=desc&amp;pub_date__year=2005&amp;o=0">2005</a></li>
+
+</ul><br class="clear" />
+</div>
+-->
+
+<% model_filters = model.filters
+unless model_filters.empty? %>
+  <div id="changelist-filter">
+    <h2>Filter</h2>
+<% model_filters.each do |filter| -%>
+      <h3>By <%=h model.column_label( filter.name ).downcase %></h3>
+      <ul>
+<% filter.options.each do |opt| -%>
+        <%= content_tag 'li', 
+              link_to( h(opt[:label]), similar_list_page_with_filter( filter.name, opt[:name] ) ), 
+              :class => ( params[:filter][filter.name] == opt[:name].to_s ? 'selected' : '' ) %>
+<% end -%>
+      </ul>
+<% end -%>
+  </div>
+<% end %>
+
+<%
+admin_table( :model => model ) do |builder|
+  builder.outer do
+    builder.prologue do
+      model.list_columns.build builder
+    end
+    @objects.each do |obj|
+      builder.with_object(obj) do
+        model.list_columns.build builder
+      end
+    end
+    builder.epilogue do
+    end
+  end
+end
+%>
+
+
+<p class="paginator">
+<%=
+pagination_links_each(@pages, :link_to_current_page => true, :window_size => 3) do |num|
+  "\n  " + case num
+  when @pages.current_page.number
+    %(<span class="this-page">#{num}</span>)
+  when @pages.last_page.number
+    link_to num.to_s, similar_list_page(:page => num), { :class => 'end' }
+  else
+    link_to num.to_s, similar_list_page(:page => num)
+  end
+end
+%>
+
+<%= @pages.item_count %> <%=h human_model( nil, @pages.item_count ).downcase %>
+</p>
+
+</div>

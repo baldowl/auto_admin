@@ -1,0 +1,23 @@
+<%
+@body_class = ''
+@content_class = 'colM'
+@title = "Change history: #{@object.to_label}"
+@breadcrumbs = [
+  link_to('Home', :controller => 'auto_admin'),
+  link_to( h( human_model(nil, true) ), { :controller => 'auto_admin', :model => params[:model], :action => 'list' } ),
+  link_to( h( @object.to_label ), { :controller => 'auto_admin', :model => params[:model], :action => 'edit', :id => params[:id] } ),
+  'Change history'
+]
+
+%>
+<div class="module">
+  <table id="change-history">
+    <thead><tr><th>Date/time</th><th>User</th><th>Action</th></tr></thead>
+    <tbody>
+<% @histories.map do |h| -%>
+      <tr><th><%=h h.created_at %></th><td><%=h h.user.name %></td><td><%=h h.description %></td></tr>
+<% end -%>
+    </tbody>
+  </table>
+</div>
+

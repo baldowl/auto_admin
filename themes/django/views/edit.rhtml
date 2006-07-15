@@ -1,0 +1,33 @@
+<%
+@body_class = 'change-form'
+@content_class = 'colM'
+@title = @object.new_record? ? "Add #{params[:model].humanize.downcase}" : "Change #{params[:model].humanize.downcase}"
+@tools = []
+@tools << link_to( "History", { :model => params[:model], :action => 'history', :id => params[:id] } ) if has_history?
+
+admin_form_for params[:model], @object, 
+  :url => { :action => 'save', :model => params[:model], :id => @object } do |builder|
+
+  builder.outer do
+    builder.prologue do
+    end
+    model.active_admin_fieldsets.each do |set|
+      set.build builder
+    end
+
+%>
+<div class="submit-row">
+<% unless @object.new_record? %>
+<p class="float-left"><%= link_to 'Delete', { :action => 'delete', :model => params[:model], :id => @object }, { :class => 'deletelink', :post => true, :confirm => "Are you sure you want to delete \"#{@object.to_label}\"?" } %></p>
+<% end %>
+<input type="submit" value="Save and add another" name="_addanother"  />
+<input type="submit" value="Save and continue editing" name="_continue" />
+<input type="submit" value="Save" class="default" />
+</div>
+<%
+
+    builder.epilogue do
+    end
+  end
+end
+%>
