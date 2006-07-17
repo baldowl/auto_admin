@@ -120,21 +120,21 @@ class AutoAdminController < ActionController::Base
       end
 
       # Save child objects
+      # FIXME: This is currently quite entirely broken. At least it
+      # isn't preventing the main object from being saved, so it should
+      # be okay for read-only lists.
       model.admin_fieldsets.each do |set|
         case set.fieldset_type
         when :tabular, :child_input
           children = @object.send( set.field )
           child_class = children.build.class
-          child_params = params[params[:model].to_s + '_' + set.field.to_s]
+          child_params = params["#{params[:model]}_#{set.field}"]
           child_params.each do |child_index, child_info|
+            next unless Hash === child_info
             o = child_info[:id] ? child_class.find( child_info[:id] ) : children.build
-            child_info.delete :id
-            if set.field_options.all? {|k,v| v[:required] ? child_info[k].blank? : true }
-              o.destroy
-            else
-              unless o.update_attributes child_info
-                render :action => 'edit' and return
-              end
+#            child_info.delete :id
+            unless o.update_attributes child_info
+              render :action => 'edit' and return
             end
           end if child_params
         end
@@ -200,7 +200,14 @@ class AutoAdminController < ActionController::Base
     roots.unshift AutoAdmin::AutoAdminConfiguration.asset_root
 
     filename = roots.map {|dir| File.join( dir, params[:path] ) }.detect {|file| File.exist?( file ) }
-    render :text => File.read(filename), :content_type => mime_type
+    raise "Unable to locate asset #{File.join(params[:path]).inspect} in any of #{roots.size} asset roots" unless filename
+
+    # FIXME: Should we do this in develpment mode? "Development"
+    # generally means of the application, but what if we're working on a
+    # theme?
+    @headers['Expires'] = (Time.now + 1.day).utc.to_formatted_s(:rfc822)
+
+    send_file filename, :type => mime_type
   end
 end
 
