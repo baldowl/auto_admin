@@ -17,6 +17,7 @@ module AutoAdminConfiguration
   def self.view_directory; theme.view_directory; end
   def self.asset_root; theme.asset_root; end
   def self.helpers; theme.respond_to?( :helpers ) ? [theme.helpers].flatten : []; end
+  def self.controller_includes; theme.respond_to?( :controller_includes ) ? [theme.controller_includes].flatten : []; end
 
   def self.set_site_info full_url, site_name, admin_site_title='Site Administration'
     ::AutoAdminHelper.site = ::AutoAdminHelper::Site.new full_url, site_name, admin_site_title

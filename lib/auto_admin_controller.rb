@@ -20,7 +20,11 @@ class AutoAdminController < ActionController::Base
   # statement over the requested action
   verify :method => :post, :only => %w( save delete )
     #, :redirect_to => { :action => 'confirm_post' }
+
   helper AutoAdmin::AutoAdminConfiguration.helpers
+  AutoAdmin::AutoAdminConfiguration.controller_includes.each do |inc|
+    include inc
+  end
 
   #model :user
   before_filter :require_valid_user, :except => [ :login, :asset ]

@@ -6,6 +6,16 @@ module AutoAdmin
     def asset_root
       directory 'public'
     end
+    def controller_includes *includes, &proc
+      @controller_includes ||= []
+      includes.each do |mod|
+        @controller_includes << mod
+      end
+      if block_given?
+        @controller_includes << Module.new(&proc)
+      end
+      @controller_includes
+    end
     def helpers
       @helpers || []
     end
@@ -35,10 +45,10 @@ module AutoAdmin
     end
 
     def table_header(field_type, field_name, options)
-      %(<th>#{yield}</th>)
+      content_tag('th', yield, options[:attributes] || {})
     end
     def table_cell(field_type, field_name, options)
-      %(<td>#{yield}</td>)
+      content_tag('td', yield, options[:attributes] || {})
     end
 
     def wrap_field(field_type, field_name, options, &block)
