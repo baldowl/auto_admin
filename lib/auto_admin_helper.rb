@@ -29,7 +29,7 @@ module AutoAdminHelper
   def human_model name=nil, pluralize=false
     s = model(name).name
     s = s.pluralize if pluralize && pluralize != 1
-    s.humanize
+    s.titleize
   end
 
 

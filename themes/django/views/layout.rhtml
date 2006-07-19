@@ -22,7 +22,7 @@
         </div>
         
         <% if user %>
-        <div id="user-tools">Welcome, <strong><%=h user.to_label %></strong>. <br /><!--<a href="../../password_change/">Change password</a> / --><%= link_to 'Log out', :controller => 'auto_admin', :action => 'logout' %></div>
+        <div id="user-tools">Welcome, <strong><%=h user.to_label %></strong>. <br /><!--<a href="../../password_change/">Change password</a> / --><%= link_to 'Log out', :controller => 'auto_admin', :action => 'logout', :model => nil %></div>
         <% end %>
         
         

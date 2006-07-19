@@ -56,8 +56,8 @@ class AutoAdminController < ActionController::Base
   end
   def login
     if request.post?
-      auth_method = [ :authenticate, :login, :find_by_username_and_password ].detect {|m| User.respond_to? m }
-      if auth_method && session[:user] = User.send( auth_method, params[:username], params[:password] )
+      auth_method = [ :authenticate, :login ].detect {|m| User.respond_to? m }
+      if session[:user] = User.send( auth_method || :find_by_username_and_password, params[:username], params[:password] )
         redirect_to :action => 'index'
       end
 
@@ -95,7 +95,7 @@ class AutoAdminController < ActionController::Base
       params[:sort_reverse] = model.sort_reverse
     end
     params[:sort_reverse] ||= false
-    order = sort_column && "#{sort_column.name} #{params[:sort_reverse] ? 'DESC' : 'ASC'}"
+    order = sort_column && "#{model.table_name}.#{sort_column.name} #{params[:sort_reverse] ? 'DESC' : 'ASC'}"
     options = { :conditions => conditions, :order => order }
     options[:include] = collect_associations_for_model
     if params[:search] && model.searchable?

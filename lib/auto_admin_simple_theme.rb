@@ -154,6 +154,10 @@ module AutoAdmin
         [['True', true], ['False', false]]
       when :belongs_to, :has_and_belongs_to_many, :has_many, :has_one
         assoc.klass.find(:all).map {|o| [o.to_label, o.id] }
+      else
+        # FIXME: This situation is hit for has_enumerated
+        #raise "Don't know how to find choices for #{field} (#{macro.inspect})"
+        []
       end
     end
     def get_option(options, option_name, object, default_value)
@@ -263,6 +267,10 @@ module AutoAdmin
       dropdown_options = find_choices(field, options)
       column = get_column_from_field(field)
       options[:selected] = field_value( field )
+
+      %(class).map {|k| k.to_sym }.each do |k|
+        html_options[k] = options.delete( k ) if options.include?( k )
+      end
       super( field, dropdown_options, options, html_options )
     end
     def radio_group(field, options = {})
@@ -305,20 +313,23 @@ module AutoAdmin
       hyperlink field, options
     end
     def static_text(field, options = {}, &block) # :yields: object
-      h static_html(field, options, &block)
+      h html(field_content(field, options, &block), options)
     end
     def static_html(field = nil, options = {}) # :yields: object
+      html(field_content(field, options, &block), options)
+    end
+    def field_content(field = nil, options = {}) # :yields: object
       raise ArgumentError, "Missing block or field name" unless field || block_given?
       v = if block_given?
         yield @object
       else
         @object.send(field)
       end
-      if v.is_a? Array
-        v.map {|o| o.to_label }.to_sentence
-      else
-        v.to_label
-      end
+    end
+    private :field_content
+    def html(content = nil, options = {}) # :yields: object
+      raise ArgumentError, "Missing block or field name" unless content || block_given?
+      block_given? ? yield( @object ) : content
     end
 
     def self.field_helpers
@@ -429,8 +440,9 @@ module AutoAdminSimpleTheme
       %(</fieldset>)
     end
 
-    (field_helpers - %w(static_html hidden_field)).each do |helper|
+    (field_helpers - %w(html hidden_field)).each do |helper|
       class_eval <<-end_src, __FILE__, __LINE__
+        alias :#{helper}_without_theme :#{helper}
         def #{helper}(field, options={}, *args, &proc)
           wrap_field #{helper.to_sym.inspect}, field, options do |*a|
             a.empty? ? super(field, options, *args, &proc) : super(*a)
