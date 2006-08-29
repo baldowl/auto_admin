@@ -32,8 +32,8 @@ class AutoAdminController < ActionController::Base
     return unless has_user?
 
     valid_user = false
-    if session[:user]
-      if permit_user_to_access_admin( session[:user] )
+    if user
+      if permit_user_to_access_admin( user )
         valid_user = true
       else
         flash[:warning] = 'Not permitted to access administration interface'
@@ -50,9 +50,25 @@ class AutoAdminController < ActionController::Base
   end
   private :permit_user_to_access_admin
 
+  def user_history_includes
+    :user
+  end
+  def user_history_identity
+    { :user_id => (user && user.id) }
+  end
+  def user_history_items(num=10)
+    conditions = []
+    condition_values = []
+    user_history_identity.each {|k,v| conditions << "#{k} = ?"; condition_values << v }
+    AdminHistory.find( :all, 
+      :conditions => [conditions.join(' AND '), *condition_values], 
+      :order => 'created_at DESC', :limit => num )
+  end
+  private :user_history_items
+
   def index
     @no_crumbs = true
-    @history_items = AdminHistory.find( :all, :conditions => ['user_id = ?', user.id], :order => 'created_at DESC', :limit => 10 ) if has_history?
+    @history_items = user_history_items if has_history?
   end
   def login
     if request.post?
@@ -151,7 +167,8 @@ class AutoAdminController < ActionController::Base
       end
 
       if has_history?
-        history = { :user_id => session[:user].id, :object_label => @object.to_label, :model => params[:model], :obj_id => @object.id }
+        history = { :object_label => @object.to_label, :model => params[:model], :obj_id => @object.id }
+        history.update user_history_identity
         if params[:id]
           history.update :change => 'edit', :description => 'Record modified'
         else
@@ -177,7 +194,7 @@ class AutoAdminController < ActionController::Base
 
   def history
     @object = params[:id] ? model.find( params[:id] ) : model.new
-    @histories = AdminHistory.find :all, :conditions => ['model = ? AND obj_id = ?', params[:model], params[:id]], :order => 'admin_histories.created_at DESC', :limit => 50, :include => [:user]
+    @histories = AdminHistory.find :all, :conditions => ['model = ? AND obj_id = ?', params[:model], params[:id]], :order => 'admin_histories.created_at DESC', :limit => 50, :include => [*user_history_includes]
   end
 
   # FIXME: Force use of POST, showing a confirmation page on GET. Isn't
@@ -185,10 +202,13 @@ class AutoAdminController < ActionController::Base
   def delete
     object = model.find( params[:id] )
     label = @object.to_label
-    hist = AdminHistory.new( :user_id => session[:user].id, :object_label => @object.to_label, :model => params[:model], :obj_id => params[:id], :change => 'delete', :description => 'Record deleted' ) if has_history?
+    if has_history?
+      history_hash = { :object_label => @object.to_label, :model => params[:model], :obj_id => params[:id], :change => 'delete', :description => 'Record deleted' }
+      history_obj = AdminHistory.new( history_hash )
+    end
     object.destroy
     flash[:notice] = "The #{human_model.downcase} \"#{object.to_label}\" was deleted successfully."
-    hist.save! if hist
+    history_obj.save! if history_obj
     redirect_to list_page_for_current
   end
 
