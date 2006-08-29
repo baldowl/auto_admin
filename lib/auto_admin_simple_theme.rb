@@ -312,28 +312,28 @@ module AutoAdmin
     def static_file(field, options = {})
       hyperlink field, options
     end
-    def static_text(field, options = {}, &block) # :yields: object
-      h html(field_content(field, options, &block), options)
+    def static_text(field, options = {})
+      h( @object.send field )
     end
-    def static_html(field = nil, options = {}) # :yields: object
-      html(field_content(field, options, &block), options)
+    def calculated_text(options = {}) # :yields: object
+      h( yield @object )
     end
-    def field_content(field = nil, options = {}) # :yields: object
-      raise ArgumentError, "Missing block or field name" unless field || block_given?
-      v = if block_given?
-        yield @object
-      else
-        @object.send(field)
-      end
+    def static_html(field, options = {})
+      @object.send field
     end
-    private :field_content
+    def calculated_html(options = {}) # :yields: object
+      yield @object
+    end
     def html(content = nil, options = {}) # :yields: object
       raise ArgumentError, "Missing block or field name" unless content || block_given?
       block_given? ? yield( @object ) : content
     end
 
+    def self.calculated_helpers
+      BaseFormBuilder.public_instance_methods(false).select {|m| m =~ /^calculated_/ }
+    end
     def self.field_helpers
-      methods = BaseFormBuilder.public_instance_methods(false) - %w(auto_field with_object inner_fields_for table_fields_for)
+      methods = BaseFormBuilder.public_instance_methods(false) - calculated_helpers - %w(html auto_field with_object inner_fields_for table_fields_for)
       ends = methods.select {|m| m =~ /^end_/ }
       begins = ends.map {|m| m.sub /^end_/, '' }
       methods - begins - ends
@@ -391,6 +391,14 @@ module AutoAdminSimpleTheme
         object, object_name, model, controller, params, options
     end
 
+    # Calculated helpers are always read-only, so they needn't do
+    # anything in a FormProcessor.
+    AutoAdmin::BaseFormBuilder.calculated_helpers.each do |helper|
+      class_eval <<-end_src, __FILE__, __LINE__
+        def #{helper}(options={}); end
+      end_src
+    end
+
     AutoAdmin::BaseFormBuilder.field_helpers.each do |helper|
       class_eval <<-end_src, __FILE__, __LINE__
         def #{helper}(field, options={}, *args, &proc)
@@ -440,7 +448,17 @@ module AutoAdminSimpleTheme
       %(</fieldset>)
     end
 
-    (field_helpers - %w(html hidden_field)).each do |helper|
+    calculated_helpers.each do |helper|
+      class_eval <<-end_src, __FILE__, __LINE__
+        alias :#{helper}_without_theme :#{helper}
+        def #{helper}(options={}, *args, &proc)
+          wrap_field #{helper.to_sym.inspect}, nil, options do |*a|
+            a.empty? ? super(options, *args, &proc) : super(*a)
+          end
+        end
+      end_src
+    end
+    (field_helpers - %w(hidden_field)).each do |helper|
       class_eval <<-end_src, __FILE__, __LINE__
         alias :#{helper}_without_theme :#{helper}
         def #{helper}(field, options={}, *args, &proc)
