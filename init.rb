@@ -1,6 +1,8 @@
 # Copyright (c) 2006 Matthew Draper
 # Released under the MIT License.  See the LICENSE file for more details.
 
+require 'auto_admin'
+
 class ActionController::Routing::RouteSet
   alias draw_without_admin draw
   def draw_with_admin
