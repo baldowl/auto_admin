@@ -109,7 +109,7 @@ module AutoAdminDjangoTheme
 
       was_first, @first = @first, false
       if was_first
-        link = link_to( yield, :action => 'edit', :model => model_name, :id => @object )
+        link = link_to( yield, :action => 'edit', :model => model_name, :id => @object.id )
         %(<th class="#{klass}">#{link}</th>)
       else
         %(<td class="#{klass}">#{yield}</td>)

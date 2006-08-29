@@ -6,7 +6,7 @@
 @tools << link_to( "History", { :model => params[:model], :action => 'history', :id => params[:id] } ) if has_history?
 
 admin_form_for params[:model], @object, 
-  :url => { :action => 'save', :model => params[:model], :id => @object } do |builder|
+  :url => { :action => 'save', :model => params[:model], :id => @object.id } do |builder|
 
   builder.outer do
     builder.prologue do
@@ -18,7 +18,7 @@ admin_form_for params[:model], @object,
 %>
 <div class="submit-row">
 <% unless @object.new_record? %>
-<p class="float-left"><%= link_to 'Delete', { :action => 'delete', :model => params[:model], :id => @object }, { :class => 'deletelink', :post => true, :confirm => "Are you sure you want to delete \"#{@object.to_label}\"?" } %></p>
+<p class="float-left"><%= link_to 'Delete', { :action => 'delete', :model => params[:model], :id => @object.id }, { :class => 'deletelink', :post => true, :confirm => "Are you sure you want to delete \"#{@object.to_label}\"?" } %></p>
 <% end %>
 <input type="submit" value="Save and add another" name="_addanother"  />
 <input type="submit" value="Save and continue editing" name="_continue" />
