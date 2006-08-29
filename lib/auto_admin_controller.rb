@@ -1,5 +1,5 @@
 
-class AutoAdminController < ActionController::Base
+class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_class
   include AutoAdminHelper
   def self.template_root
     AutoAdmin::AutoAdminConfiguration.view_directory

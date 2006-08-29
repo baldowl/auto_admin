@@ -24,6 +24,8 @@ module AutoAdminConfiguration
   end
   def self.primary_objects; @@primary_objects ||= []; end
   def self.primary_objects= new_value; @@primary_objects = new_value; end
+  def self.controller_super_class; @@controller_super_class ||= ActionController::Base; end
+  def self.controller_super_class=(klass); @@controller_super_class = klass; end
   def self.model name
     Object.const_get( name.to_s.camelcase )
   end
