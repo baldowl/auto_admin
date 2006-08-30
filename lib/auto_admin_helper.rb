@@ -13,15 +13,8 @@ module AutoAdminHelper
   end
 
 
-  class Site
-    attr_accessor :url, :short_url, :name
-    def initialize *args; @url, @short_url, @name = *args; end
-  end
   def site
-    AutoAdminHelper.site
-  end
-  class << self
-    attr_accessor :site
+    AutoAdmin::AutoAdminConfiguration.site
   end
   def user
     session[:user]

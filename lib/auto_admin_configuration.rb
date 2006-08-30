@@ -19,9 +19,12 @@ module AutoAdminConfiguration
   def self.helpers; theme.respond_to?( :helpers ) ? [theme.helpers].flatten : []; end
   def self.controller_includes; theme.respond_to?( :controller_includes ) ? [theme.controller_includes].flatten : []; end
 
+  Site = Struct.new(:url, :short_url, :name)
   def self.set_site_info full_url, site_name, admin_site_title='Site Administration'
-    ::AutoAdminHelper.site = ::AutoAdminHelper::Site.new full_url, site_name, admin_site_title
+    self.site = Site.new(full_url, site_name, admin_site_title)
   end
+  def self.site; @@site ||= raise("AutoAdmin not configured: site info not set"); end
+  def self.site= new_value; @@site = new_value; end
   def self.primary_objects; @@primary_objects ||= []; end
   def self.primary_objects= new_value; @@primary_objects = new_value; end
   def self.controller_super_class; @@controller_super_class ||= ActionController::Base; end
