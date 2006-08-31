@@ -406,6 +406,10 @@ module AutoAdminSimpleTheme
         end
       end_src
     end
+    def nullable(field_type, field, options={})
+      check_for_nullable_field! field
+      common_field_translations! field
+    end
 
     %w(outer prologue epilogue).each do |helper|
       class_eval <<-end_src, __FILE__, __LINE__
@@ -420,6 +424,9 @@ module AutoAdminSimpleTheme
     def common_field_translations!(field_name)
       return unless params.include? field_name
       translate_association_to_column! field_name
+    end
+    def check_for_nullable_field!(field_name)
+      params[field_name] = nil if params.delete( "#{field_name}_NULL" ) == 'NULL'
     end
     def translate_association_to_column!(field_name)
       column = get_column_from_field( field_name )
@@ -446,6 +453,18 @@ module AutoAdminSimpleTheme
     end
     def end_fieldset
       %(</fieldset>)
+    end
+
+    def nullable(field_type, field_name, options={})
+      wrap_field field_type, field_name, options do |*a|
+        null_label = options.delete(:null_label) || 'None'
+        standard_field = send("#{field_type}_without_theme", field_name, options)
+        is_null = field_value(field_name).nil?
+        <<-foo
+        <input type="radio" name="#{@object_name}[#{field_name}_NULL]" value="NULL" #{'checked="checked" ' if is_null}/> #{null_label}<br />
+        <input type="radio" name="#{@object_name}[#{field_name}_NULL]" value="" #{'checked="checked" ' unless is_null}/> #{standard_field}
+        foo
+      end
     end
 
     calculated_helpers.each do |helper|
