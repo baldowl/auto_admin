@@ -4,6 +4,7 @@ RAILS_ENV = "test"
 rails_root = ARGV.shift || File.expand_path(File.join(File.dirname(__FILE__), '../../../..'))
 require "#{rails_root}/config/environment.rb"
 require 'action_controller/test_process'
+require 'dispatcher'
 require 'breakpoint'
 
 class Test::Unit::TestCase

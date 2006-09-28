@@ -27,25 +27,25 @@ class AdminRoutingTest < Test::Unit::TestCase
 
   # Standard model-less action
   def test_login
-    opts = { :controller => 'auto_admin', :action => 'login' }
+    opts = { :controller => 'auto_admin', :action => 'login', :model => nil }
     assert_routing url_for( opts ), opts
   end
 
   # Model without ID (default action)
   def test_list
-    opts = { :controller => 'auto_admin', :action => 'list', :model => 'user' }
+    opts = { :controller => 'auto_admin', :action => 'list', :model => 'user', :id => nil }
     assert_routing url_for( opts ), opts
   end
 
   # Model with ID (default action)
   def test_edit
-    opts = { :controller => 'auto_admin', :action => 'edit', :model => 'user', :id => 7 }
+    opts = { :controller => 'auto_admin', :action => 'edit', :model => 'user', :id => '7' }
     assert_routing url_for( opts ), opts
   end
 
   # Model with ID (specific action)
   def test_delete
-    opts = { :controller => 'auto_admin', :action => 'delete', :model => 'user', :id => 7 }
+    opts = { :controller => 'auto_admin', :action => 'delete', :model => 'user', :id => '7' }
     assert_routing url_for( opts ), opts
   end
 end

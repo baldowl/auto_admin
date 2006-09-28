@@ -101,7 +101,7 @@ class EditTest < Test::Unit::TestCase
     get :edit, :model => 'customer', :id => 15
     assert_tag :tag => 'input', :attributes => { :checked => true, :id => 'customer_active_true', :name => 'customer[active]', :value => 'true' }
     assert_tag :tag => 'input', :attributes => { :checked => false, :id => 'customer_active_false', :name => 'customer[active]', :value => 'false' }
-    assert_tag :tag => 'div', :child => { :content => ' True' }
+    assert_tag :tag => 'div', :child => { :content => ' True ' }
     assert_tag :tag => 'div', :child => { :content => ' False' }
 
     get :edit, :model => 'customer', :id => 16
@@ -168,7 +168,7 @@ class EditTest < Test::Unit::TestCase
     get :edit, :model => 'customer', :id => 15
     assert_tag :tag => 'input', :attributes => { :checked => true, :id => 'customer_active_true', :name => 'customer[active]', :value => 'true' }
     assert_tag :tag => 'input', :attributes => { :checked => false, :id => 'customer_active_false', :name => 'customer[active]', :value => 'false' }
-    assert_tag :tag => 'div', :child => { :content => ' Active' }
+    assert_tag :tag => 'div', :child => { :content => ' Active ' }
     assert_tag :tag => 'div', :child => { :content => ' Suspended' }
 
     get :edit, :model => 'customer', :id => 16
