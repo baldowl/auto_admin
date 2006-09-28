@@ -93,7 +93,6 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     end
     def method_missing method, field=nil, options={}
       associations << field if field && model.reflect_on_association( field )
-      yield if block_given?
     end
   end
   def collect_associations_for_model
