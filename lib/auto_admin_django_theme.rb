@@ -100,13 +100,12 @@ module AutoAdminDjangoTheme
       super
     end
     def table_cell(field_type, field_name, options)
-      if field_name
-        column = model.find_column(field_name)
-        assoc = model.reflect_on_association(field_name.to_sym)
-        klass = assoc ? assoc.klass.name.underscore.to_s : column.type.to_s
-      else
-        klass = ''
-      end
+      column = model.find_column(field_name)
+      assoc = model.reflect_on_association(field_name.to_sym)
+
+      klass = assoc ? assoc.klass.name.underscore :
+              column ? column.type :
+              ''
 
       was_first, @first = @first, false
       if was_first
