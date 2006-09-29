@@ -100,8 +100,10 @@ module AutoAdminDjangoTheme
       super
     end
     def table_cell(field_type, field_name, options)
-      column = model.find_column(field_name)
-      assoc = model.reflect_on_association(field_name.to_sym)
+      if field_name
+        column = model.find_column(field_name)
+        assoc = model.reflect_on_association(field_name.to_sym)
+      end
 
       klass = assoc ? assoc.klass.name.underscore :
               column ? column.type :
