@@ -133,6 +133,24 @@ class ConfigurationListTest < ConfigurationTest
   end
 
 
+  def test_filter_options_for
+    assert_equal [], Film.columns_for_filter
+    Film.filter_by :rating
+    Film.filter_options_for :rating, 'A' => 'X', 'B' => 'Y', 'C' => 'Z'
+    assert_equal [:rating], Film.columns_for_filter
+    assert_equal( { 'rating' => '*' }, Film.filter_defaults )
+    assert_equal ['rating = ?', 'B'], Film.filter_conditions( :rating => 'B' )
+  end
+  def test_filter_options_for_with_custom_sql_builder
+    assert_equal [], Film.columns_for_filter
+    Film.filter_by :length
+    Film.filter_options_for( :length, '0-60' => 'Very Short', '60-120' => 'Short', '120-999' => 'Long' ) do |val|
+      ["length BETWEEN ? AND ?", *( val.split('-').map {|n| n.to_i } )]
+    end
+    assert_equal [:length], Film.columns_for_filter
+    assert_equal( { 'length' => '*' }, Film.filter_defaults )
+    assert_equal ['length BETWEEN ? AND ?', 0, 60], Film.filter_conditions( :length => '0-60' )
+  end
   def test_filter_by_string
     assert_equal [], Film.columns_for_filter
     Film.filter_by :rating

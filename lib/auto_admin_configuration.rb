@@ -117,7 +117,7 @@ EVAL
     end
 
     def filter_options_for column_name, custom_options, &block
-      (@custom_filter_options ||= {})[column_name.to_sym] = AutoAdmin::CustomFilterSet.new( column_name, custom_options, &block )
+      (@custom_filter_options ||= {})[column_name.to_sym] = AutoAdmin::CustomFilterSet.new( self, reflect_on_association( column_name ) || find_column( column_name ), custom_options, &block )
     end
     def filters
       columns_for_filter.map { |col| filter_instance( col ) }

@@ -41,11 +41,14 @@ module AutoAdmin
       super klass, column
       @options, @block = options, block
     end
+    def sql_from_string option_name
+      @block ? @block.call( option_name ) : super
+    end
     def other_options
       a = []
       @options.each do |k,v|
         o = build_option( k, v )
-        o[:sql] = block.call( k ) unless block.nil?
+        o[:sql] = @block.call( k ) unless @block.nil?
         a << o
       end
       a.sort_by {|i| i[:label] }
