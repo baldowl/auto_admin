@@ -200,13 +200,14 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
   # there a plugin that does that? I can't find it on the Wiki atm...
   def delete
     object = model.find( params[:id] )
-    label = @object.to_label
+    label = object.to_label
     if has_history?
-      history_hash = { :object_label => @object.to_label, :model => params[:model], :obj_id => params[:id], :change => 'delete', :description => 'Record deleted' }
+      history_hash = { :object_label => label, :model => params[:model], :obj_id => params[:id], :change => 'delete', :description => 'Record deleted' }
+      history_hash.update user_history_identity
       history_obj = AdminHistory.new( history_hash )
     end
     object.destroy
-    flash[:notice] = "The #{human_model.downcase} \"#{object.to_label}\" was deleted successfully."
+    flash[:notice] = "The #{human_model.downcase} \"#{label}\" was deleted successfully."
     history_obj.save! if history_obj
     redirect_to list_page_for_current
   end
