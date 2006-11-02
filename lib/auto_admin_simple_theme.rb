@@ -219,6 +219,11 @@ module AutoAdmin
     end
     private :field_value
 
+    def object_helper(helper_name, field, options, *extra)
+      @template.send(helper_name, @object_name, field, options.merge( :object => @object ), *extra)
+    end
+    private :object_helper
+
     def inner_fields_for(inner_object_name, inner_object)
       @template.fields_for( "#{@object_name}_#{inner_object_name}", inner_object, @template, @options ) do |i|
         yield i
@@ -250,6 +255,12 @@ module AutoAdmin
     def datetime_select(field, options = {})
       common_option_translations! options
       super
+    end
+    def text_field_with_auto_complete(field, options = {})
+      common_option_translations! options
+      completion_options = options.delete(:completion) || {}
+      raise "AutoAdmin text_field_with_auto_complete requires explicit :completion => { :url => .. }" unless completion_options.key? :url
+      object_helper :text_field_with_auto_complete, field, options, completion_options
     end
     def text_field(field, options = {})
       common_option_translations! options
