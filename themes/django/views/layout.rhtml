@@ -34,10 +34,10 @@
       if params[:model]
         crumbs = [link_to( 'Home', :controller => 'auto_admin')]
         if params[:action] == 'list'
-          crumbs << h( params[:model].pluralize.humanize )
+          crumbs << h( human_model(nil, true) )
         else
-          crumbs << link_to( h( params[:model].pluralize.humanize ), { :controller => 'auto_admin', :model => params[:model], :action => 'list', :id => nil } )
-          crumbs << h( (defined?( @object ) && @object.respond_to?( :to_label )) ? @object.to_label : @title )
+          crumbs << link_to( h( human_model(nil, true) ), { :controller => 'auto_admin', :model => params[:model], :action => 'list', :id => nil } )
+          crumbs << h( (defined?( @object ) && !@object.new_record? && @object.respond_to?( :to_label )) ? @object.to_label : @title )
         end
       else
         crumbs = ['Home']

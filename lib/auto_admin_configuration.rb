@@ -29,6 +29,8 @@ module AutoAdminConfiguration
   def self.primary_objects= new_value; @@primary_objects = new_value; end
   def self.controller_super_class; @@controller_super_class ||= ActionController::Base; end
   def self.controller_super_class=(klass); @@controller_super_class = klass; end
+  def self.url_prefix; @@url_prefix ||= 'admin'; end
+  def self.url_prefix= new_value; @@url_prefix = new_value; end
   def self.model name
     Object.const_get( name.to_s.camelcase )
   end
@@ -51,6 +53,8 @@ module AutoAdminConfiguration
         def #{name}= new_value; @#{name} = new_value; end
 EVAL
     end
+    def human_name(v=nil); @human_name = v if v; @human_name ||= name.titleize; end
+
     def self.array_accessor *names
       names.each {|name| defaulted_accessor name, '[]' }
     end
@@ -156,6 +160,8 @@ EVAL
     def sort_column; defined?( @sort_column ) ? @sort_column : (default_sort_info[:column] rescue nil); end
     def sort_reverse; defined?( @sort_column ) ? @sort_reverse : (default_sort_info[:reverse] rescue nil); end
 
+    def paginate_every(n=nil); @paginate = n if n; @paginate || 20; end
+
     array_accessor :admin_fieldsets
     def default_admin_fieldsets
       [InputFieldset.new( self, '', default_columns_for_edit )]
@@ -241,8 +247,9 @@ EVAL
         if children.respond_to? :build
           1.upto blank_records do |n|
             idx += 1
-            build_object(builder, children.build, idx,
-              "#{row.class.name.underscore.humanize.downcase} ##{n}")
+            o = children.build
+            build_object(builder, o, idx,
+              "#{o.class.human_name} ##{n}")
           end
         end
       end
@@ -258,7 +265,9 @@ EVAL
       def fieldset_type; :tabular; end
 
       def build_object(builder, obj, idx, caption)
-        builder.with_object(obj) do
+        name = field.to_s.dup
+        name << '[' << idx.to_s << ']' if idx
+        builder.with_object(obj, name) do
           builder.fieldset( :fields, caption ) do
             yield builder if block_given?
             proc.call( builder ) if proc
@@ -269,7 +278,8 @@ EVAL
         children = builder.object.send( field )
         builder.fieldset( :table, name ) do
           model = object.reflect_on_association( field ).klass
-          builder.table_fields_for( field, nil, :model => model ) do |inner|
+          opts = options.merge( :model => model )
+          builder.table_fields_for( field, nil, opts ) do |inner|
             inner.outer do
               inner.prologue do
                 build_object(inner, nil, nil, nil)
@@ -288,7 +298,7 @@ EVAL
         unless query.empty?
           conditions = options[:conditions] || []
           conditions = [conditions] unless conditions.is_a? Array
-          new_condition = '(' + columns_for_search.map { |col| "#{col} LIKE ?" }.join( ' OR ' ) + ')'
+          new_condition = '(' + columns_for_search.map { |col| "#{col} ILIKE ?" }.join( ' OR ' ) + ')'
           if conditions.size > 0
             conditions[0] = "(#{conditions[0]}) AND (#{new_condition})"
           else

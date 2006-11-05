@@ -20,9 +20,9 @@ module AutoAdminHelper
     session[:user]
   end
   def human_model name=nil, pluralize=false
-    s = model(name).name
+    s = model(name).human_name
     s = s.pluralize if pluralize && pluralize != 1
-    s.titleize
+    s
   end
 
 

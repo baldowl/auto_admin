@@ -1,7 +1,7 @@
 <%
 @body_class = 'change-form'
 @content_class = 'colM'
-@title = @object.new_record? ? "Add #{params[:model].humanize.downcase}" : "Change #{params[:model].humanize.downcase}"
+@title = @object.new_record? ? "Add #{human_model.downcase}" : "Change #{human_model.downcase}"
 @tools = []
 @tools << link_to( "History", { :model => params[:model], :action => 'history', :id => params[:id] } ) if has_history?
 

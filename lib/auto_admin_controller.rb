@@ -116,7 +116,7 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     if params[:search] && model.searchable?
       model.append_search_condition! params[:search], options
     end
-    options.update( :per_page => (params[:per_page] || 20).to_i, :singular_name => params[:model] )
+    options.update( :per_page => (params[:per_page] || model.paginate_every).to_i, :singular_name => params[:model] )
     @pages, @objects = paginate(params[:model], options)
     session[:admin_list_params] ||= {}
     session[:admin_list_params][params[:model]] = params
@@ -134,25 +134,51 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
       end
 
       # Save attributes on the primary object
-      unless @object.update_attributes( params[params[:model]] ) && @object.valid?
+      flash[:notice] = @object.inspect
+      @object.attributes = params[params[:model]]
+      unless @object.save
+        flash[:warning] = "Failed to update the #{human_model.downcase} \"#{@object.to_label}\". "
         render :action => 'edit' and return
       end
 
-      # Save child objects
-      # FIXME: This is currently quite entirely broken. At least it
-      # isn't preventing the main object from being saved, so it should
-      # be okay for read-only lists.
+      # Save child objects... seems to work at the moment (for tables,
+      # at least)
       model.admin_fieldsets.each do |set|
         case set.fieldset_type
         when :tabular, :child_input
+          next if set.options[:read_only]
+
+          is_blank = lambda do |info|
+            if set.options[:blank]
+              case set.options[:blank]
+              when Hash
+                set.options[:blank].all? do |k,v|
+                  !info.include?(k) ||
+                    (Proc === v ? v.call(info[k]) : info[k] === v)
+                end
+              when Proc
+                set.options[:blank].call(info)
+              end
+            else
+              info.values.all? {|v| v.blank? }
+            end
+          end
+
           children = @object.send( set.field )
           child_class = children.build.class
-          child_params = params["#{params[:model]}_#{set.field}"]
+          child_params = params[set.field.to_s]
           child_params.each do |child_index, child_info|
+            child_info = child_info.dup
             next unless Hash === child_info
-            o = child_info[:id] ? child_class.find( child_info[:id] ) : children.build
-#            child_info.delete :id
+            child_id = child_info.delete :id
+            if child_info.delete(:delete) == 'DELETE' || is_blank.call(child_info)
+              child_class.find( child_id ).destroy if child_id
+              next
+            end
+
+            o = child_id ? child_class.find( child_id ) : children.build
             unless o.update_attributes child_info
+              flash[:warning] = "Failed to #{o.new_record? ? 'add' : 'change'} the #{o.class.name.titleize.downcase} \"#{o.to_label}\" (#{set.label || 'Child list'}). "
               render :action => 'edit' and return
             end
           end if child_params

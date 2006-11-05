@@ -117,9 +117,9 @@ module AutoAdmin
   end
   module PrivateFormHelpers
     private
-    DEFAULT_OPTIONS = { :sort_key => :sort }.freeze
+    DEFAULT_OPTIONS = { :sort_key => :sort, :link => 1 }.freeze
     def option(opt_name)
-      DEFAULT_OPTIONS.include?( opt_name ) ? DEFAULT_OPTIONS[opt_name] : @options[opt_name]
+      (@options && @options.include?( opt_name )) ? @options[opt_name] : DEFAULT_OPTIONS[opt_name]
     end
     def model
       klass = @object ? @object.class : option(:model)
@@ -238,10 +238,12 @@ module AutoAdmin
         yield i
       end
     end
-    def with_object(object)
+    def with_object(object, object_name=@object_name)
       previous_object, @object = @object, object
+      previous_object_name, @object_name = @object_name, object_name
       yield
-      @object = previous_object
+      @object, @object_name = previous_object, previous_object_name
+      @object
     end
 
     def hidden_field(field, options = {})
@@ -324,10 +326,12 @@ module AutoAdmin
       hyperlink field, options
     end
     def static_text(field, options = {})
-      h( @object.send field )
+      v = @object.send(field)
+      h( v.nil? ? v : v.to_label )
     end
     def calculated_text(options = {}) # :yields: object
-      h( yield @object )
+      v = yield @object
+      h( v.nil? ? v : v.to_label )
     end
     def static_html(field, options = {})
       @object.send field
@@ -390,10 +394,12 @@ module AutoAdminSimpleTheme
       table_params = @controller.params[name]
       yield self.class.new( inner_object, name, extra_options[:model], @controller, table_params, options ) if table_params
     end
-    def with_object(object)
+    def with_object(object, object_name=@object_name)
       previous_object, @object = @object, object
+      previous_object_name, @object_name = @object_name, object_name
       yield
-      @object = previous_object
+      @object, @object_name = previous_object, previous_object_name
+      @object
     end
 
     attr_accessor :object, :object_name, :model, :controller, :params, :options
@@ -483,7 +489,7 @@ module AutoAdminSimpleTheme
         alias :#{helper}_without_theme :#{helper}
         def #{helper}(options={}, *args, &proc)
           wrap_field #{helper.to_sym.inspect}, nil, options do |*a|
-            a.empty? ? super(options, *args, &proc) : super(*a)
+            a.empty? ? #{helper}_without_theme(options, *args, &proc) : #{helper}_without_theme(*a)
           end
         end
       end_src
@@ -493,7 +499,7 @@ module AutoAdminSimpleTheme
         alias :#{helper}_without_theme :#{helper}
         def #{helper}(field, options={}, *args, &proc)
           wrap_field #{helper.to_sym.inspect}, field, options do |*a|
-            a.empty? ? super(field, options, *args, &proc) : super(*a)
+            a.empty? ? #{helper}_without_theme(field, options, *args, &proc) : #{helper}_without_theme(*a)
           end
         end
       end_src

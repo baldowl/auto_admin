@@ -7,14 +7,15 @@ class ActionController::Routing::RouteSet
   alias draw_without_admin draw
   def draw_with_admin
     draw_without_admin do |map|
-      map.connect 'admin', :controller => 'auto_admin', :action => 'index'
-      map.connect 'admin/-/:action/:id', :controller => 'auto_admin', :action => 'index',
+      prefix = AutoAdmin::AutoAdminConfiguration.url_prefix rescue 'admin'
+      map.connect "#{prefix}", :controller => 'auto_admin', :action => 'index'
+      map.connect "#{prefix}/-/:action/:id", :controller => 'auto_admin', :action => 'index',
         :requirements => { :model => nil }
-      map.connect 'admin/asset/*path', :controller => 'auto_admin', :action => 'asset'
+      map.connect "#{prefix}/asset/*path", :controller => 'auto_admin', :action => 'asset'
 
-      map.connect 'admin/:model/:action', :controller => 'auto_admin', :action => 'list', 
+      map.connect "#{prefix}/:model/:action", :controller => 'auto_admin', :action => 'list', 
         :requirements => { :action => /[^0-9].*/, :id => nil }
-      map.connect 'admin/:model/:id/:action', :controller => 'auto_admin', :action => 'edit', 
+      map.connect "#{prefix}/:model/:id/:action", :controller => 'auto_admin', :action => 'edit', 
         :requirements => { :id => /\d+/ }
       yield map
     end

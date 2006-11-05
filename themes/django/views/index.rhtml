@@ -11,7 +11,7 @@ AutoAdmin::AutoAdminConfiguration.grouped_objects do |group, group_objects|
 group_objects.each do |obj|
   o = obj.name.underscore
   %>
-    <tr><th><%= link_to o.humanize, list_page_for(o) %></th>
+    <tr><th><%= link_to obj.human_name, list_page_for(o) %></th>
       <td><%= link_to 'Add', { :model => o, :action => 'edit' }, { :class => 'addlink' } %></td>
       <td><%= link_to 'Change', list_page_for( o ), { :class => 'changelink' } %></td></tr>
 <% end %>

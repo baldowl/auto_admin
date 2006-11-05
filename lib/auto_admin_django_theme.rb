@@ -77,6 +77,15 @@ module AutoAdminDjangoTheme
         %(<div class="form-row">#{inner}</div>)
       end
     end
+    def static_text_without_theme(field, options = {})
+      v = @object.send(field)
+      if v == true || v == false
+        v = v ? 'Yes' : 'No'
+        helpers.send(:image_tag, helpers.send(:url_for, :escape => false, :action => :asset, :path => "images/auto_admin/icon-#{v.downcase}.gif" ), :alt => v, :title => v)
+      else
+        super
+      end
+    end
   end
   class TableBuilder < AutoAdmin::TableBuilder(FormBuilder)
     def table_header(field_type, field_name, options)
@@ -96,8 +105,18 @@ module AutoAdminDjangoTheme
     end
     def outer; %(<table cellspacing="0">); end
     def fieldset(style, title=nil)
-      @first = true
+      @column_num = 0
       super
+    end
+    def delete_button options={}
+      wrap_field :delete_button, nil, options do |*a|
+        <<-foo
+        <a href="#" onclick="this.getElementsByTagName('input')[0].value = 'DELETE'; this.parentNode.parentNode.style.display = 'none'; return false;">
+          <input type="hidden" value="" name="#{@object_name}[delete]" />
+          #{helpers.send(:image_tag, helpers.send(:url_for, :escape => false, :action => :asset, :path => "images/auto_admin/icon_deletelink.gif" ), :alt => ' [X]', :title => 'Delete')}
+        </a>
+        foo
+      end
     end
     def table_cell(field_type, field_name, options)
       if field_name
@@ -109,8 +128,20 @@ module AutoAdminDjangoTheme
               column ? column.type :
               ''
 
-      was_first, @first = @first, false
-      if was_first
+      @column_num += 1
+      do_link = 
+        case opt = option(:link)
+        when Array
+          opt.any? {|el| (el === @column_num rescue false) || (el === field_name rescue false) }
+        when Proc
+          opt[@column_num, field_name, options]
+        when true, false, nil
+          opt
+        else
+          opt === @column_num
+        end
+
+      if do_link
         link = link_to( yield, :action => 'edit', :model => model_name, :id => @object.id )
         %(<th class="#{klass}">#{link}</th>)
       else
