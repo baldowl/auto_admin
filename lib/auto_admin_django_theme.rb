@@ -31,9 +31,11 @@ module AutoAdminDjangoTheme
     end
     def wrap_field(field_type, field_name, options)
       options[:class] = options[:class] ? options[:class].dup : ''
-      column = model.find_column( field_name )
-      assoc = model.reflect_on_association( field_name.to_sym )
-      column_type = ( assoc && assoc.macro ) || ( column && column.type )
+      if field_name
+        column = model.find_column( field_name )
+        assoc = model.reflect_on_association( field_name.to_sym )
+        column_type = ( assoc && assoc.macro ) || ( column && column.type )
+      end
       case field_type
       when :text_field
         case column_type
@@ -41,7 +43,7 @@ module AutoAdminDjangoTheme
           options[:class] << ' vTextField'
           options[:size] ||= 30
           options[:maxlength] ||= column.limit
-        when :integer
+        when :integer, :decimal
           options[:class] << ' vIntegerField'
           options[:size] ||= 10
         when :text
@@ -67,7 +69,7 @@ module AutoAdminDjangoTheme
       inner = super
       inner << %(<p class="help">#{h options[:caption]}</p>) if options[:caption]
 
-      if field_invalid? field_name
+      if field_name && field_invalid?(field_name)
         %(<div class="form-row errors"><ul class="errorlist">) +
           field_errors( field_name ).map {|msg|
             %(<li>This field #{h msg}</li>)
