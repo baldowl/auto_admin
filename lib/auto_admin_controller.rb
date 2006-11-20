@@ -178,7 +178,9 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
 
             o = child_id ? child_class.find( child_id ) : children.build
             unless o.update_attributes child_info
-              flash[:warning] = "Failed to #{o.new_record? ? 'add' : 'change'} the #{o.class.name.titleize.downcase} \"#{o.to_label}\" (#{set.label || 'Child list'}). "
+              set_name = 'Child list'
+              set_name = set.name if set.respond_to?(:name) && !set.name.blank?
+              flash[:warning] = "Failed to #{o.new_record? ? 'add' : 'change'} the #{o.class.name.titleize.downcase} \"#{o.to_label}\" (#{set_name}). "
               render :action => 'edit' and return
             end
           end if child_params
