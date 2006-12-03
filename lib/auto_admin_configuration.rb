@@ -172,7 +172,7 @@ EVAL
       sets
     end
     def default_columns_for_edit
-      magic_fields = %w(created_at created_on updated_at updated_on) 
+      magic_fields = %w(created_at created_on updated_at updated_on) + [locking_column, inheritance_column]
       columns = content_columns.map {|c| c.name} - magic_fields
       reflect_on_all_associations.select {|a| [:belongs_to, :has_and_belongs_to_many].include?(a.macro) }.each do |assoc|
         columns << assoc.name.to_s
