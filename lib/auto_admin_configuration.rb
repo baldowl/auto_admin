@@ -248,6 +248,7 @@ EVAL
           1.upto blank_records do |n|
             idx += 1
             o = children.build
+            children.delete o
             build_object(builder, o, idx,
               "#{o.class.human_name} ##{n}")
           end

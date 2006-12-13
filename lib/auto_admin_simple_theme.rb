@@ -390,9 +390,13 @@ module AutoAdminSimpleTheme
     def table_fields_for(inner_object_name, inner_object, extra_options={}, &proc)
       options = @options.dup
       options.update extra_options
-      name = "#{@object_name}_#{inner_object_name}"
-      table_params = @controller.params[name]
-      yield self.class.new( inner_object, name, extra_options[:model], @controller, table_params, options ) if table_params
+      if table_params = @controller.params[inner_object_name]
+        table_params.each do |row_number, row_params|
+          if row_params
+            yield self.class.new( inner_object, inner_object_name, extra_options[:model], @controller, row_params, options )
+          end
+        end
+      end
     end
     def with_object(object, object_name=@object_name)
       previous_object, @object = @object, object

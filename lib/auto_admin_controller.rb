@@ -134,7 +134,6 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
       end
 
       # Save attributes on the primary object
-      flash[:notice] = @object.inspect
       @object.attributes = params[params[:model]]
       unless @object.save
         flash[:warning] = "Failed to update the #{human_model.downcase} \"#{@object.to_label}\". "
@@ -180,7 +179,9 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
             unless o.update_attributes child_info
               set_name = 'Child list'
               set_name = set.name if set.respond_to?(:name) && !set.name.blank?
-              flash[:warning] = "Failed to #{o.new_record? ? 'add' : 'change'} the #{o.class.name.titleize.downcase} \"#{o.to_label}\" (#{set_name}). "
+              flash[:warning] = "Failed to #{o.new_record? ? 'add' : 'change'} the #{o.class.name.titleize.downcase} \"#{o.to_label}\" (#{set_name})"
+              o.errors.each_full {|s| flash[:warning] << "; " << s }
+              flash[:warning] << ". "
               render :action => 'edit' and return
             end
           end if child_params
