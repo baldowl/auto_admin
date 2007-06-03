@@ -31,6 +31,13 @@ class ::Object
     inspect
   end
 end
+
+# We want AssociationProxy to forward #to_label on to its target, but
+# because we're adding the above to Object after AssociationProxy
+# flushes its instance methods, we have to do it manually.
+ActiveRecord::Associations::AssociationProxy.send :undef_method, :to_label
+
+class ::Array; def to_label; map {|m| m.to_label }.join(', '); end; end
 class ::TrueClass; def to_label; 'Yes'; end; end
 class ::FalseClass; def to_label; 'No'; end; end
 class ::NilClass; def to_label; '(none)'; end; end
