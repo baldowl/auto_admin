@@ -123,6 +123,9 @@ EVAL
     def filter_options_for column_name, custom_options, &block
       (@custom_filter_options ||= {})[column_name.to_sym] = AutoAdmin::CustomFilterSet.new( self, reflect_on_association( column_name ) || find_column( column_name ), custom_options, &block )
     end
+    def dynamic_filter_options_for column_name, &block
+      filter_options_for( column_name, block )
+    end
     def filters
       columns_for_filter.map { |col| filter_instance( col ) }
     end
@@ -133,6 +136,8 @@ EVAL
       klass = case type = filter_type( column_name )
       when :belongs_to: AutoAdmin::AssociationFilterSet
       when :has_one: AutoAdmin::AssociationFilterSet
+      when :has_many: AutoAdmin::MultiAssociationFilterSet
+      when :has_and_belongs_to_many: AutoAdmin::MultiAssociationFilterSet
       when :datetime: AutoAdmin::DateFilterSet
       else
         const = type.to_s.camelcase + 'FilterSet'

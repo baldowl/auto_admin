@@ -46,7 +46,9 @@ module AutoAdmin
     end
     def other_options
       a = []
-      @options.each do |k,v|
+      options = @options
+      options = options.call if options.respond_to?( :call )
+      options.each do |k,v|
         o = build_option( k, v )
         o[:sql] = @block.call( k ) unless @block.nil?
         a << o
@@ -90,7 +92,7 @@ module AutoAdmin
       assoc.name.to_s
     end
     def sql_column
-      (assoc.options && assoc.options[:foreign_key]) || (assoc.name.to_s + '_id')
+      assoc.association_foreign_key
     end
     def objects
       assoc.klass.find :all
@@ -103,6 +105,11 @@ module AutoAdmin
     end
     def sql_from_string option_name
       sql_from_value option_name.to_i
+    end
+  end
+  class MultiAssociationFilterSet < AssociationFilterSet
+    def sql_from_value option_name
+      ["EXISTS(SELECT * FROM #{assoc.options[:join_table]} WHERE #{assoc.primary_key_name} = #{assoc.active_record.primary_key} AND #{assoc.association_foreign_key} = ?)", option_name]
     end
   end
   class BooleanFilterSet < SimpleFilterSet

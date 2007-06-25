@@ -177,7 +177,7 @@ module AutoAdmin
     end
     def get_column_from_field(field)
       assoc = model.reflect_on_association( field.to_sym )
-      assoc ? assoc.primary_key_name : field
+      assoc ? ([:has_many, :has_and_belongs_to_many].include?(assoc.macro) ? "#{field.to_s.singularize}_ids" : assoc.primary_key_name) : field
     end
 
     def macro_type(column_name)
@@ -285,6 +285,16 @@ module AutoAdmin
         html_options[k] = options.delete( k ) if options.include?( k )
       end
       super( field, dropdown_options, options, html_options )
+    end
+    def multiselect(field, options = {}, html_options = {})
+      common_option_translations! options
+      dropdown_options = find_choices(field, options)
+      column = get_column_from_field(field)
+      html_defaults = { :size => 8, :multiple => true,
+        :name => "#{@object_name}[#{column}][]",
+        :id => "#{@object_name}_#{column}" }
+
+      helpers.content_tag('select', helpers.options_for_select( dropdown_options, @object && @object.send(column) ), html_defaults.merge( html_options ) )
     end
     def radio_group(field, options = {})
       common_option_translations! options
