@@ -104,18 +104,15 @@ time soon. You can currently customise which fields are displayed (the
 field list is a block of code, after all), but will end up with empty
 fieldsets if you don't include any.
 
-If you have any access control (which I expect will pretty much always
-be the case), you must have a User constant, it must respond to one of
+If you have any access control (which I expect will pretty much always be
+the case), you must have a User constant, it must respond to one of
 (authenticate, login, or find_by_username_and_password), and that method
-must take two strings, and return nil for failure or a non-false value
-for success. It *should* return the authenticated user's model -- if the
-returned value responds to one or more of (active?, enabled?, disabled?,
-and admin?), they will be treated appropriately. The currently logged-in
-user (as returned by the authentication function) will be looked for and
-stored in session[:user], so if other parts of your site do the same,
-things will Just Work. I'm concious of the fact that storing
-ActiveRecord instances in the session is inadvisable, and will probably
-change this sometime soon.
+must take two strings, and return nil for failure or a non-false value for
+success. It *should* return the authenticated user's id -- the id will be
+stored in session[:user_id] and the currently logged-in user will be looked
+for; if the returned value responds to one or more of (active?, enabled?,
+disabled?, and admin?), they will be treated appropriately. So if other
+parts of your site do the same, things will Just Work.
 
 
 What do you need?
@@ -367,9 +364,6 @@ index page?
 A top-level "menu", containing links to the primary object lists by
 default, that a theme can permanently display.
 
-It's probably a better idea to store the logged-in user's id, instead of
-the user object, in the session.
-
 
 Longer-term architectural considerations?
 
@@ -380,7 +374,3 @@ AutoAdminController. I haven't gotten around to doing that, and am now
 quite intruiged by the approach taken by Streamlined -- adding a new
 type of class. Any such move is primarily aimed at solving a problem I'm
 not yet sufferring, though, so for now it's just a topic to ponder.
-
-
-
-

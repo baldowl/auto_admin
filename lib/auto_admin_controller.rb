@@ -71,7 +71,7 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
   def login
     if request.post?
       auth_method = [ :authenticate, :login ].detect {|m| User.respond_to? m }
-      if session[:user] = User.send( auth_method || :find_by_username_and_password, params[:username], params[:password] )
+      if session[:user_id] = User.send( auth_method || :find_by_username_and_password, params[:username], params[:password] )
         redirect_to :action => 'index'
       end
 
@@ -80,7 +80,7 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     @no_crumbs = true
   end
   def logout
-    session[:user] = nil
+    session[:user_id] = nil
     redirect_to :action => 'index'
   end
 

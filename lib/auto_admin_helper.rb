@@ -17,7 +17,7 @@ module AutoAdminHelper
     AutoAdmin::AutoAdminConfiguration.site
   end
   def user
-    session[:user]
+    session[:user_id] ? User.find(session[:user_id]) : nil
   end
   def human_model name=nil, pluralize=false
     s = model(name).human_name
