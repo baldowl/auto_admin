@@ -118,6 +118,15 @@ ActiveRecord instances in the session is inadvisable, and will probably
 change this sometime soon.
 
 
+What do you need?
+
+To use auto_admin with Rails 2.* you need an extra plugin,
+classic_pagination, because the pagination mechanism has been removed from
+the Rails core base.
+
+	svn://errtheblog.com/svn/plugins/classic_pagination
+
+
 How do I use it?
 
 Initially (after installing the plugin, obviously), you need to add a

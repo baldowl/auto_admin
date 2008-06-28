@@ -1,8 +1,8 @@
 
 class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_class
   include AutoAdminHelper
-  def self.template_root
-    AutoAdmin::AutoAdminConfiguration.view_directory
+  def self.view_paths
+    [AutoAdmin::AutoAdminConfiguration.view_directory]
   end
   def template_layout
     './layout'
@@ -258,7 +258,7 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     # FIXME: Should we do this in develpment mode? "Development"
     # generally means of the application, but what if we're working on a
     # theme?
-    @headers['Expires'] = (Time.now + 1.day).utc.to_formatted_s(:rfc822)
+    headers['Expires'] = (Time.now + 1.day).utc.to_formatted_s(:rfc822)
 
     send_file filename, :type => mime_type
   end
