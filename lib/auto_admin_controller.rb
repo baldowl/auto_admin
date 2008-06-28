@@ -1,11 +1,9 @@
 
 class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_class
   include AutoAdminHelper
-  def self.view_paths
-    [AutoAdmin::AutoAdminConfiguration.view_directory]
-  end
+  self.view_paths = AutoAdmin::AutoAdminConfiguration.view_directory
   def template_layout
-    './layout'
+    'layout.html.erb'
   end
   # Just the action name, thanks; we use our custom template_root to
   # handle the rest.
