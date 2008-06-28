@@ -328,6 +328,8 @@ module AutoAdmin
     def image_field(field, options = {})
     end
     def secure_password(field, options = {})
+      common_option_translations! options
+      self.password_field field, options
     end
 
     def static_image(field, options = {})

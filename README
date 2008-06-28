@@ -252,7 +252,7 @@ Available Form Helpers
 
 Simple helpers that just delegate to the ActionView's FormBuilder:
   hidden_field, date_select, datetime_select, text_field, text_area,
-  check_box
+  check_box, secure_password
 
 +select+ and +radio_group+ operate in basically the same way; they both
 provide a method of selecting one out of several choices (ignoring
