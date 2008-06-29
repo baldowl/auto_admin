@@ -119,11 +119,10 @@ things will Just Work.
 
 What do you need?
 
-To use auto_admin with Rails 2.* you need an extra plugin,
-classic_pagination, because the pagination mechanism has been removed from
-the Rails core base.
+To use auto_admin with Rails 2.* you need an extra plugin, will_paginate,
+because the pagination mechanism has been removed from the Rails core base.
 
-	svn://errtheblog.com/svn/plugins/classic_pagination
+	git://github.com/mislav/will_paginate.git
 
 
 How do I use it?

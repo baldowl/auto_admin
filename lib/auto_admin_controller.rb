@@ -113,8 +113,8 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     if params[:search] && model.searchable?
       model.append_search_condition! params[:search], options
     end
-    options.update( :per_page => (params[:per_page] || model.paginate_every).to_i, :singular_name => params[:model] )
-    @pages, @objects = paginate(params[:model], options)
+    options.update(:page => params[:page], :per_page => (params[:per_page] || model.paginate_every).to_i)
+    @objects = model.paginate(options)
     session[:admin_list_params] ||= {}
     session[:admin_list_params][params[:model]] = params
   end

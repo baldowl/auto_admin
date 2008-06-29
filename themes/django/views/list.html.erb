@@ -64,18 +64,7 @@ end
 
 
 <p class="paginator">
-<%=
-pagination_links_each(@pages, :link_to_current_page => true, :window_size => 3) do |num|
-  "\n  " + case num
-  when @pages.current_page.number
-    %(<span class="this-page">#{num}</span>)
-  when @pages.last_page.number
-    link_to num.to_s, similar_list_page(:page => num), { :class => 'end' }
-  else
-    link_to num.to_s, similar_list_page(:page => num)
-  end
-end
-%>
-
-<%= @pages.item_count %> <%=h human_model( nil, @pages.item_count ).downcase %>
+<%= will_paginate @objects, :inner_window => 1, :container => false %>
+&nbsp;&nbsp;&nbsp;
+<%= page_entries_info @objects, :entry_name => human_model %>
 </p>
