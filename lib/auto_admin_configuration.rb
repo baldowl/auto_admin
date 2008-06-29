@@ -27,6 +27,14 @@ module AutoAdminConfiguration
   def self.site= new_value; @@site = new_value; end
   def self.primary_objects; @@primary_objects ||= []; end
   def self.primary_objects= new_value; @@primary_objects = new_value; end
+  def self.admin_model; @@admin_model ||= nil; end
+  def self.admin_model=(new_value)
+    @@admin_model = new_value.to_s.camelize.constantize
+  end
+  def self.admin_model_id; @@admin_model_id ||= nil; end
+  def self.admin_model_id=(new_value)
+    @@admin_model_id = new_value.to_sym
+  end
   def self.controller_super_class; @@controller_super_class ||= ActionController::Base; end
   def self.controller_super_class=(klass); @@controller_super_class = klass; end
   def self.url_prefix; @@url_prefix ||= 'admin'; end

@@ -24,7 +24,6 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     include inc
   end
 
-  #model :user
   before_filter :require_valid_user, :except => [ :login, :asset ]
   def require_valid_user
     return unless has_user?
@@ -49,10 +48,10 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
   private :permit_user_to_access_admin
 
   def user_history_includes
-    :user
+    AutoAdmin::AutoAdminConfiguration.admin_model.to_s.downcase.to_sym
   end
   def user_history_identity
-    { :user_id => (user && user.id) }
+    { AutoAdmin::AutoAdminConfiguration.admin_model_id => (user && user.id) }
   end
   def user_history_items(num=10)
     conditions = []
@@ -70,8 +69,8 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
   end
   def login
     if request.post?
-      auth_method = [ :authenticate, :login ].detect {|m| User.respond_to? m }
-      if session[:user_id] = User.send( auth_method || :find_by_username_and_password, params[:username], params[:password] )
+      auth_method = [ :authenticate, :login ].detect {|m| AutoAdmin::AutoAdminConfiguration.admin_model.respond_to? m }
+      if session[AutoAdmin::AutoAdminConfiguration.admin_model_id] = AutoAdmin::AutoAdminConfiguration.admin_model.send( auth_method || :find_by_username_and_password, params[:username], params[:password] )
         redirect_to :action => 'index'
       end
 
@@ -80,7 +79,7 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     @no_crumbs = true
   end
   def logout
-    session[:user_id] = nil
+    session[AutoAdmin::AutoAdminConfiguration.admin_model_id] = nil
     redirect_to :action => 'index'
   end
 

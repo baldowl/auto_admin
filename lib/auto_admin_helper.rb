@@ -9,7 +9,7 @@ module AutoAdminHelper
     AdminHistory rescue nil
   end
   def has_user?
-    User rescue nil
+    AutoAdmin::AutoAdminConfiguration.admin_model
   end
 
 
@@ -17,7 +17,7 @@ module AutoAdminHelper
     AutoAdmin::AutoAdminConfiguration.site
   end
   def user
-    session[:user_id] ? User.find(session[:user_id]) : nil
+    session[AutoAdmin::AutoAdminConfiguration.admin_model_id] ? AutoAdmin::AutoAdminConfiguration.admin_model.find(session[AutoAdmin::AutoAdminConfiguration.admin_model_id]) : nil
   end
   def human_model name=nil, pluralize=false
     s = model(name).human_name
