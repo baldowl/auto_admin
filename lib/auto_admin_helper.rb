@@ -1,3 +1,5 @@
+require 'faster_csv'
+
 module AutoAdminHelper
   def model name=nil
     AutoAdmin::AutoAdminConfiguration.model( name || params[:model] )
@@ -115,5 +117,24 @@ module AutoAdminHelper
     }.update(options)
     fields_for(nil, nil, opts, &proc)
   end
-end
 
+  def tweak_csv_excel_content_type
+    if request.respond_to?(:user_agent)
+      request.user_agent =~ /windows/i ? 'application/vnd.ms-excel' : 'text/csv'
+    else
+      'text/csv'
+    end
+  end
+
+  def export_into_csv_excel(model, collection)
+    content_type = tweak_csv_excel_content_type
+    csv_content = FasterCSV.generate do |csv|
+      csv << model.columns.map {|col| col.human_name}
+      collection.each do |o|
+        csv << model.columns.map {|col| o.send(col.name.to_sym)}
+      end
+    end
+    send_data csv_content, :type => content_type,
+      :filename => "#{params[:model]}.csv"
+  end
+end

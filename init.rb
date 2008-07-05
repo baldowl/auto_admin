@@ -15,6 +15,7 @@ class ActionController::Routing::RouteSet
 
       map.connect "#{prefix}/:model/:action", :controller => 'auto_admin', :action => 'list', 
         :requirements => { :action => /[^0-9].*/, :id => nil }
+      map.connect "#{prefix}/:model.:format", :controller => 'auto_admin', :action => 'list'
       map.connect "#{prefix}/:model/:id/:action", :controller => 'auto_admin', :action => 'edit', 
         :requirements => { :id => /\d+/ }
       yield map

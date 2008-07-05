@@ -1,4 +1,3 @@
-
 class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_class
   include AutoAdminHelper
   self.view_paths = AutoAdmin::AutoAdminConfiguration.view_directory
@@ -113,10 +112,18 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     if params[:search] && model.searchable?
       model.append_search_condition! params[:search], options
     end
-    options.update(:page => params[:page], :per_page => (params[:per_page] || model.paginate_every).to_i)
-    @objects = model.paginate(options)
-    session[:admin_list_params] ||= {}
-    session[:admin_list_params][params[:model]] = params
+    respond_to do |format|
+      format.html do
+        options.update(:page => params[:page], :per_page => (params[:per_page] || model.paginate_every).to_i)
+        @objects = model.paginate(options)
+        session[:admin_list_params] ||= {}
+        session[:admin_list_params][params[:model]] = params
+      end
+      format.csv do
+        @objects = model.find(:all, options)
+        export_into_csv_excel(model, @objects)
+      end
+    end
   end
 
   def save

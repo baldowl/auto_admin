@@ -124,6 +124,8 @@ because the pagination mechanism has been removed from the Rails core base.
 
 	git://github.com/mislav/will_paginate.git
 
+You also need the faster_csv gem.
+
 
 How do I use it?
 

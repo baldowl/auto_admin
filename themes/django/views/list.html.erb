@@ -2,7 +2,8 @@
 @body_class = 'change-list'
 @content_class = 'flex'
 @title = "Select #{human_model.downcase} to change"
-@tools = [link_to( "Add #{human_model.downcase}", { :model => params[:model], :action => 'edit' }, { :class => 'addlink' } )]
+@tools = [link_to( "Add #{human_model.downcase}", { :model => params[:model], :action => 'edit' }, { :class => 'addlink' } ),
+  link_to( "Save as Excel/CSV", { :model => params[:model], :format => 'csv', :filter => params[:filter], :sort => params[:sort], :sort_reverse => params[:sort_reverse], :search => params[:search] } )]
 %>
 <div class="module filtered" id="changelist">
 
