@@ -333,6 +333,21 @@ module AutoAdmin
     end
 
     def static_image(field, options = {})
+      value = @object.send field
+      return none_string(options) if value.nil?
+      controller = options.delete(:controller) || 'auto_admin'
+      action = options.delete(:action) || 'edit'
+      options[:src] ||= helpers.send(:url_for, :controller => controller,
+        :action => action, :id => @object.send(:id))
+      if options[:size]
+        options[:width], options[:height] = options.delete(:size).split("x")
+      end
+      options[:alt] ||= @object.send(:to_label)
+      if block_given?
+        v = yield @object
+        options.merge!(v) if v.kind_of? Hash
+      end
+      helpers.send(:tag, "img", options)
     end
     def static_file(field, options = {})
       hyperlink field, options

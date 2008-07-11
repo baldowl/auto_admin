@@ -272,11 +272,23 @@ are multiple suitable candidates, it tries to go for the more
 generally-applicable choice (for example, it favours a +select+ over a
 +radio_group+ for a belongs_to association).
 
++static_image+ sports a number of options used to build an hash suitable for
+the +tag+ helper responsible for the creation of final <img> tag: :controller
+(default "auto_admin") and :action (default "edit") allows to select a
+controller which should return the image based upon this object's id; :src
+override the previous two options and can be used with any URL, static or
+dynamic; with :size one can write the width and height used to show the image
+(format: "XxY"); :alt, which defaults to this object's to_label(). Everything
+else is passed as is to the +tag+ helper (so one could use :style or :class to
+alter the looks of <img>). This helper accepts a block, with a single
+parameter (this object), which can be used to return an hash to be merged into
+the options that are about to be passed to the tag helper.
+
 None of the following actually work, but they're defined, waiting for me
 to come back and write them. +html_area+ will eventually use FCKeditor
 by default, and presumably the file/image fields will delegate to
 file_column.
-  html_area, hyperlink, file_field, image_field, static_image,
+  html_area, hyperlink, file_field, image_field,
   static_file, static_html
 
 
