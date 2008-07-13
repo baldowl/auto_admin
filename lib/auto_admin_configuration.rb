@@ -39,6 +39,8 @@ module AutoAdminConfiguration
   def self.controller_super_class=(klass); @@controller_super_class = klass; end
   def self.url_prefix; @@url_prefix ||= 'admin'; end
   def self.url_prefix= new_value; @@url_prefix = new_value; end
+  def self.save_as=(formats); @@save_as_formats = formats; end
+  def self.save_as; @@save_as_formats ||= []; end
   def self.model name
     Object.const_get( name.to_s.camelcase )
   end

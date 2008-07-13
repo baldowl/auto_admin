@@ -1,5 +1,6 @@
 class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_class
   include AutoAdminHelper
+  include AutoAdminSaveAs
   self.view_paths = AutoAdmin::AutoAdminConfiguration.view_directory
   def template_layout
     'layout.html.erb'
@@ -119,10 +120,7 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
         session[:admin_list_params] ||= {}
         session[:admin_list_params][params[:model]] = params
       end
-      format.csv do
-        @objects = model.find(:all, options)
-        export_into_csv_excel(model, @objects)
-      end
+      save_as_blocks self, format, options
     end
   end
 

@@ -1,5 +1,3 @@
-require 'faster_csv'
-
 module AutoAdminHelper
   def model name=nil
     AutoAdmin::AutoAdminConfiguration.model( name || params[:model] )
@@ -118,23 +116,13 @@ module AutoAdminHelper
     fields_for(nil, nil, opts, &proc)
   end
 
-  def tweak_csv_excel_content_type
-    if request.respond_to?(:user_agent)
-      request.user_agent =~ /windows/i ? 'application/vnd.ms-excel' : 'text/csv'
-    else
-      'text/csv'
-    end
+  def save_as_link_to format
+    link_to "Save as #{format.to_s.capitalize}", {:model => params[:model],
+      :format => format, :filter => params[:filter], :sort => params[:sort],
+      :sort_reverse => params[:sort_reverse], :search => params[:search]}
   end
 
-  def export_into_csv_excel(model, collection)
-    content_type = tweak_csv_excel_content_type
-    csv_content = FasterCSV.generate do |csv|
-      csv << model.columns.map {|col| col.human_name}
-      collection.each do |o|
-        csv << model.columns.map {|col| o.send(col.name.to_sym)}
-      end
-    end
-    send_data csv_content, :type => content_type,
-      :filename => "#{params[:model]}.csv"
+  def save_as_links
+    AutoAdmin::AutoAdminConfiguration.save_as.map {|format| save_as_link_to(format)}
   end
 end
