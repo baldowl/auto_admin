@@ -125,7 +125,8 @@ because the pagination mechanism has been removed from the Rails core base.
 	git://github.com/mislav/will_paginate.git
 
 For the optional export mechanism you also need:
-  * the faster_csv gem for the CSV export module.
+  * the faster_csv gem for the CSV export module;
+  * the pdf-writer gem for the PDF export module.
 
 
 How do I use it?
