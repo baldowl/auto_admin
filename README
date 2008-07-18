@@ -1,18 +1,16 @@
-Rails AutoAdmin Plugin
+= Rails AutoAdmin Plugin
 
-What is it?
+== What is it?
 
 A plugin for Ruby on Rails that automagically creates an administration
-interface, based on your models. It is heavily inspired by the Django
-[1] administration system, and the only theme currently available is
-based directly on Django's administration system. From the screenshots
-posted so far, it appears to share goals with Streamlined [2].
-
-  [1] Django:      http://www.djangoproject.com/
-  [2] Streamlined: http://streamlined.relevancellc.com/
+interface, based on your models. It is heavily inspired by the
+Django[http://www.djangoproject.com/] administration system, and the only
+theme currently available is based directly on Django's administration system.
+From the screenshots posted so far, it appears to share goals with
+Streamlined[http://streamlined.relevancellc.com/].
 
 
-Example?
+== Example?
 
   class Customer < ActiveRecord::Base
     belongs_to :store
@@ -37,12 +35,11 @@ Example?
     end
   end
 
-  Results in:
-    http://trebex.net/~matthew/auto-admin-0.0/list.png
-    http://trebex.net/~matthew/auto-admin-0.0/edit.png
+Results in: http://trebex.net/~matthew/auto-admin-0.0/list.png
+http://trebex.net/~matthew/auto-admin-0.0/edit.png
 
 
-What isn't it?
+== What isn't it?
 
 Scaffolding. This is not a view generator for you to then customise.
 Either it provides the interface you want, or it doesn't. (With a
@@ -59,7 +56,7 @@ trying to create an interface for all your users, this probably isn't
 for you.
 
 
-Where is it?
+== Where is it?
 
 Right now, there's just a tarball available at
 http://trebex.net/~matthew/auto-admin-0.0/auto-admin-0.0.tar.gz.
@@ -69,7 +66,7 @@ useful Web page. Writing this has at least given me some material to
 that end.
 
 
-Is it usable?
+== Is it usable?
 
 Perhaps, but probably not quite yet. It currently doesn't like editable
 sublists, for one, and it lacks a reliable set of tests... I've TDDed a
@@ -89,11 +86,11 @@ Rails experience than I do, and I expect that fact will be heavily
 reflected in any comparison between this plugin and Streamlined.
 
 
-What does it assume?
+== What does it assume?
 
 All objects it encounters can be usefully represented to a human as a
-string. It achieves this by adding a to_label method to Object, which
-will return the first available of (label, name, to_s, or inspect).
+string. It achieves this by adding a +to_label+ method to +Object+, which
+will return the first available of (+label+, +name+, +to_s+, or +inspect+).
 
 Your access control requirements for the administration section are
 relatively "all or nothing". I intend to add simple class- and fieldset-
@@ -105,34 +102,34 @@ field list is a block of code, after all), but will end up with empty
 fieldsets if you don't include any.
 
 If you have any access control (which I expect will pretty much always be
-the case), you must specify it with the #admin_model= and #admin_model_id=
+the case), you must specify it with the +admin_model=+ and +admin_model_id=+
 methods in the configuration block of AutoAdmin; the class must respond to
-one of (authenticate, login, or find_by_username_and_password), and that
+one of (+authenticate+, +login+, or +find_by_username_and_password+), and that
 method must take two strings, and return nil for failure or a non-false
 value for success. It *should* return the authenticated user's id -- the id
-will be stored in the session using the key provided by #admin_model_id and
+will be stored in the session using the key provided by +admin_model_id+ and
 the currently logged-in user will be looked for; if the returned value
-responds to one or more of (active?, enabled?, disabled?, and admin?), they
+responds to one or more of (+active?+, +enabled?+, +disabled?+, and +admin?+), they
 will be treated appropriately. So if other parts of your site do the same,
 things will Just Work.
 
 
-What do you need?
+== What do you need?
 
-To use auto_admin with Rails 2.* you need an extra plugin, will_paginate,
-because the pagination mechanism has been removed from the Rails core base.
-
-	git://github.com/mislav/will_paginate.git
+To use AutoAdmin with Rails 2.* you need an extra plugin,
+will_paginate[git://github.com/mislav/will_paginate.git], because the
+pagination mechanism has been removed from the Rails core base.
 
 For the optional export mechanism you also need:
-  * the faster_csv gem for the CSV export module;
-  * the pdf-writer gem for the PDF export module.
+* the *faster_csv* gem for the CSV export module;
+* the *pdf-writer* gem for the PDF export module.
 
 
-How do I use it?
+== How do I use it?
 
 Initially (after installing the plugin, obviously), you need to add a
 few lines to the bottom of your environment.rb:
+
   AutoAdmin.config do |admin|
     # This information is used by the theme to construct a useful
     # header; the first parameter is the full URL of the main site, the
@@ -149,6 +146,9 @@ few lines to the bottom of your environment.rb:
     # The configurable access control system.
     admin.admin_model = Account
     admin.admin_model_id = :account_id
+
+    # The optional export mechanism.
+    admin.save_as = %w(pdf csv)
   end
 
 Having done that, you can now (re-)start script/server, and navigate to
@@ -160,7 +160,7 @@ To customise which fields appear in the edit and list screens, you go on
 to...
 
 
-How does it work? - Part I, Declarative UI definition
+== How does it work? - Part I, Declarative UI definition
 
 The plugin adds a number of singleton methods to ActiveRecord::Base,
 which permit you to declare how the administration interface should
@@ -228,7 +228,7 @@ methods:
     # WARNING: This also has no tests, and I believe it will break
     # horribly if you try to use it at all.
 
-Field Definition Block?!?
+== Field Definition Block?!?
 
 A number of the above methods provide for a block to declare what fields
 are to be shown. This is achieved by yielding a builder to the block.
@@ -254,7 +254,7 @@ permissively, at this stage). It would be unwise to vary the fields
 returned based on the object for a list view, for fairly obvious
 reasons.
 
-Available Form Helpers
+== Available Form Helpers
 
 Simple helpers that just delegate to the ActionView's FormBuilder:
   hidden_field, date_select, datetime_select, text_field, text_area,
@@ -296,7 +296,7 @@ file_column.
   static_file, static_html
 
 
-How does it work? - Part II, Themes
+== How does it work? - Part II, Themes
 
 The theme bundled with the plugin is named 'django'; all credit for its
 excellent appearance goes to the Django project. I hope we can get a
@@ -358,7 +358,7 @@ choices have been moved into the options hash, to keep all method
 signatures of the form (field_name, options, *other_stuff).
 
 
-What's planned, but missing?
+== What's planned, but missing?
 
 The ability for the application to inject custom field types into the
 base FormBuilder and FormProcessor. The theme-specific versions of these
@@ -386,7 +386,7 @@ A top-level "menu", containing links to the primary object lists by
 default, that a theme can permanently display.
 
 
-Longer-term architectural considerations?
+== Longer-term architectural considerations?
 
 After starting off defining the administration interfaces directly in
 the models (as Django does), I was strongly considering moving them all
