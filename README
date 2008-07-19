@@ -27,6 +27,7 @@ Streamlined[http://streamlined.relevancellc.com/].
     admin_fieldset do |b|
       b.text_field :first_name
       b.text_field :last_name
+      b.auto_field :active
       b.select :store
     end
     admin_child_table 'Payments', :payments do |b|
@@ -34,9 +35,6 @@ Streamlined[http://streamlined.relevancellc.com/].
       b.static_text :amount
     end
   end
-
-Results in: http://trebex.net/~matthew/auto-admin-0.0/list.png
-http://trebex.net/~matthew/auto-admin-0.0/edit.png
 
 
 == What isn't it?
@@ -58,60 +56,41 @@ for you.
 
 == Where is it?
 
-Right now, there's just a tarball available at
-http://trebex.net/~matthew/auto-admin-0.0/auto-admin-0.0.tar.gz.
+The public git repository is hosted by Github[http://github.com] and can be
+reached starting from http://github.com/baldowl/auto_admin
 
-I need to get a public SVN repository set up for it, and populate a
-useful Web page. Writing this has at least given me some material to
-that end.
-
-
-== Is it usable?
-
-Perhaps, but probably not quite yet. It currently doesn't like editable
-sublists, for one, and it lacks a reliable set of tests... I've TDDed a
-few features, but the tests covering the rest of the functionality are
-rather sparse. 
-
-I'm releasing mostly for selfish reasons: I'm hoping that publishing the
-code will shame me into fixing the nasty bits. :)
-
-Other, more pressing, time constraints are forcing this release before I
-get it cleaned up as much as I'd like (hence the lack of public SVN or a
-website). An unfortunate side-effect of this is the timing with respect
-to Streamlined's release. On that note, I'll be looking closely at
-Streamlined upon its release, probably with a view to moving any useful
-functionality I've built here into it; Justin and Stuart have far more
-Rails experience than I do, and I expect that fact will be heavily
-reflected in any comparison between this plugin and Streamlined.
+I cannot stress enough that this is just a fork of the original code written
+by Matthew Draper; if you prefer the original version, then get it from the
+Subversion repository at http://svn.trebex.net/auto-admin/trunk/auto-admin
 
 
 == What does it assume?
 
-All objects it encounters can be usefully represented to a human as a
-string. It achieves this by adding a +to_label+ method to +Object+, which
-will return the first available of (+label+, +name+, +to_s+, or +inspect+).
+All objects it encounters can be usefully represented to a human as a string.
+It achieves this by adding a +to_label+ method to +Object+, which will return
+the first available of +label+, +name+, +to_s+ or +inspect+.
 
-Your access control requirements for the administration section are
-relatively "all or nothing". I intend to add simple class- and fieldset-
-level declarative permission checking soonish (whenever I start to need
-it). Access control based on querying individual objects should come at
-some point, but I don't anticipate needing that level of control any
-time soon. You can currently customise which fields are displayed (the
-field list is a block of code, after all), but will end up with empty
-fieldsets if you don't include any.
+Your access control requirements for the administration section are relatively
+"all or nothing". I intend to add simple class- and fieldset- level
+declarative permission checking soonish (whenever I start to need it). Access
+control based on querying individual objects should come at some point, but I
+don't anticipate needing that level of control any time soon. You can
+currently customise which fields are displayed (the field list is a block of
+code, after all), but will end up with empty fieldsets if you don't include
+any.
 
-If you have any access control (which I expect will pretty much always be
-the case), you must specify it with the +admin_model=+ and +admin_model_id=+
-methods in the configuration block of AutoAdmin; the class must respond to
-one of (+authenticate+, +login+, or +find_by_username_and_password+), and that
-method must take two strings, and return nil for failure or a non-false
-value for success. It *should* return the authenticated user's id -- the id
-will be stored in the session using the key provided by +admin_model_id+ and
-the currently logged-in user will be looked for; if the returned value
-responds to one or more of (+active?+, +enabled?+, +disabled?+, and +admin?+), they
-will be treated appropriately. So if other parts of your site do the same,
-things will Just Work.
+If you have any access control (which I expect will pretty much always be the
+case), you must specify it with the <tt>admin_model=</tt> and
+<tt>admin_model_id=</tt> methods in the configuration block of AutoAdmin; the
+class must respond to +authenticate+, +login+, or
++find_by_username_and_password+ and that method must take two strings and
+return +nil+ for failure or a non-false value for success. It *must* return
+the authenticated user's id -- the id will be stored in the session using the
+key provided by +admin_model_id+ and the currently logged-in user will be
+looked for; if the returned value responds to one or more of <tt>active?</tt>,
+<tt>enabled?</tt>, <tt>disabled?</tt> or <tt>admin?</tt>, they will be treated
+appropriately. So if other parts of your site do the same, things will Just
+Work.
 
 
 == What do you need?
@@ -121,21 +100,24 @@ will_paginate[git://github.com/mislav/will_paginate.git], because the
 pagination mechanism has been removed from the Rails core base.
 
 For the optional export mechanism you also need:
+
 * the *faster_csv* gem for the CSV export module;
-* the *pdf-writer* gem for the PDF export module.
+
+* the <b>pdf-writer</b> gem for the PDF export module.
 
 
 == How do I use it?
 
 Initially (after installing the plugin, obviously), you need to add a
-few lines to the bottom of your environment.rb:
+few lines to the bottom of your environment.rb or in an initializer file:
 
   AutoAdmin.config do |admin|
     # This information is used by the theme to construct a useful
     # header; the first parameter is the full URL of the main site, the
     # second is the displayed name of the site, and the third (optional)
     # parameter is the title for the administration site.
-    admin.set_site_info 'http://www.example.tld/', 'example.tld'
+    admin.set_site_info 'http://www.example.com/', 'example.com',
+      'Administration area for example.com'
 
     # "Primary Objects" are those for which lists should be directly
     # accessible from the home page.
@@ -143,7 +125,7 @@ few lines to the bottom of your environment.rb:
 
     admin.theme = :django # Optional; this is the default.
 
-    # The configurable access control system.
+    # The configurable, optional access control system.
     admin.admin_model = Account
     admin.admin_model_id = :account_id
 
@@ -151,10 +133,10 @@ few lines to the bottom of your environment.rb:
     admin.save_as = %w(pdf csv)
   end
 
-Having done that, you can now (re-)start script/server, and navigate to
-http://localhost:3000/admin/. Yes, it installs its own routes. Yes,
-they're hard-coded. Yes, that needs to change... for now, just don't try
-to use /admin/ for anything else. :)
+Having done that, you can now (re-)start <tt>script/server</tt>, and navigate
+to http://localhost:3000/admin/. Yes, it installs its own routes. Yes, they're
+hard-coded. Yes, that needs to change... for now, just don't try to use
+<tt>/admin/</tt> for anything else. :)
 
 To customise which fields appear in the edit and list screens, you go on
 to...
@@ -177,56 +159,65 @@ I really need to go through and write decent documentation for all the
 published methods, but for now, the following summary should at least
 act as a guide. Essentially, inside the model, you can use the following
 methods:
-  object_group(group_name)
-    # Declares which 'object group' this object belongs to, for use in
-    # the interface. Currently, this is used to group together related
-    # objects on the index page.
-  sort_by(column, reverse=false)
-    # Instructs the list view to sort on the specified column by
-    # default.
-  search_by(*columns)
-    # Add rudimentary text searching across the named columns. Note that
-    # this defines a MyModel.search(many, query, options={}) wrapper
-    # around MyModel.find(many, options).
-  filter_by(*columns)
-    # Allow filtering of the list screen by the named columns (filtering
-    # currently works for: custom, boolean, date, belongs_to, has_one,
-    # and string). Note that the last three will do rather nasty and
-    # sub-optimal queries to determine the filter options.
-  default_filter(filters)
-    # Takes a hash of (column, value) pairs, to default a filter to
-    # something other than 'All'.
-  filter_options_for(column, choices, &block)
-    # Specifies a fixed set of choices to be offered as filter options
-    # instead of automatically working it out. Choices should be a
-    # (value, label) hash. The optional block will be given each value
-    # in turn, and should return an SQL condition fragment.
-  column_labels(labels)
-    # Takes a hash of (column, label) pairs, to change the default label
-    # for a field to explicitly define the human label for a column.
-    # This label will be the default used in both list and edit views.
-  list_columns(*columns, &proc)
-    # Takes either a simple-list of column names, or a Field Definition
-    # Block (see below)
-  admin_fieldset(label='', *columns, &proc)
-    # Defines a fieldset for edit views. For simple use, you can just
-    # give it a list of columns. Once you get started, you'll want to
-    # pass a Field Definition Block, though.
-  admin_child_table(label, collection, options={}, &proc)
-    # Defines a fieldset for edit views, to show a table of items from a
-    # child collection. It uses a Field Definition Block to declare what
-    # columns should be shown. Generally, you'd want to use the
-    # static_text helper, I suspect.
-    # WARNING: This has no tests, and I'm almost certain it will break
-    # horribly if you try to use anything other than static_text.
-  admin_child_form(collection, options={}, &proc)
-    # Defines a "fieldset" for edit views, to show *several* fieldsets,
-    # each containing one object from a child collection. It uses a
-    # Field Definition Block to declare what columns should be shown.
-    # I don't think it'd be wise to use this on a large collection, but
-    # it's your application. :)
-    # WARNING: This also has no tests, and I believe it will break
-    # horribly if you try to use it at all.
+
+[object_group(group_name)]
+  Declares which 'object group' this object belongs to, for use in the
+  interface. Currently, this is used to group together related objects on the
+  index page.
+
+[sort_by(column, reverse=false)]
+  Instructs the list view to sort on the specified column by default.
+
+[search_by(*columns)]
+  Add rudimentary text searching across the named columns. Note that this
+  defines a <tt>MyModel.search(many, query, options={})</tt> wrapper around
+  <tt>MyModel.find(many, options)</tt>.
+
+[filter_by(*columns)]
+  Allow filtering of the list screen by the named columns (filtering currently
+  works for: custom, boolean, date, belongs_to, has_one, and string). Note
+  that the last three will do rather nasty and sub-optimal queries to
+  determine the filter options.
+
+[default_filter(filters)]
+  Takes a hash of (column, value) pairs, to default a filter to something
+  other than 'All'.
+
+[filter_options_for(column, choices, &block)]
+  Specifies a fixed set of choices to be offered as filter options instead of
+  automatically working it out. Choices should be a (value, label) hash. The
+  optional block will be given each value in turn, and should return an SQL
+  condition fragment.
+
+[column_labels(labels)]
+  Takes a hash of (column, label) pairs, to change the default label for a
+  field to explicitly define the human label for a column. This label will be
+  the default used in both list and edit views.
+
+[list_columns(*columns, &proc)]
+  Takes either a simple-list of column names, or a Field Definition Block (see
+  below)
+
+[admin_fieldset(label='', *columns, &proc)]
+  Defines a fieldset for edit views. For simple use, you can just give it a
+  list of columns. Once you get started, you'll want to pass a Field
+  Definition Block, though.
+
+[admin_child_table(label, collection, options={}, &proc)]
+  Defines a fieldset for edit views, to show a table of items from a child
+  collection. It uses a Field Definition Block to declare what columns should
+  be shown. Generally, you'd want to use the static_text helper, I suspect.
+  *WARNING*: This has no tests, and I'm almost certain it will break horribly
+  if you try to use anything other than static_text.
+
+[admin_child_form(collection, options={}, &proc)]
+  Defines a "fieldset" for edit views, to show *several* fieldsets, each
+  containing one object from a child collection. It uses a Field Definition
+  Block to declare what columns should be shown. I don't think it'd be wise to
+  use this on a large collection, but it's your application. :) *WARNING*:
+  This also has no tests, and I believe it will break horribly if you try to
+  use it at all.
+
 
 == Field Definition Block?!?
 
@@ -240,7 +231,7 @@ helper on the builder for each field that it wishes to display. The
 +auto_field+ helper (which automatically determines an appropriate field
 type based on column and association metadata) is available if you only
 want to specify the field type for some of the fields. All field helpers
-take (field_name, options={}, *other_stuff). Most just take the two
+take <tt>(field_name, options={}, *other_stuff)</tt>. Most just take the two
 parameters, and I'm considering deprecating the extra parameters on
 those that currently support them. Note that unlike a standard builder,
 you don't have to do anything with the return value; the theme's actual
@@ -254,46 +245,55 @@ permissively, at this stage). It would be unwise to vary the fields
 returned based on the object for a list view, for fairly obvious
 reasons.
 
+
 == Available Form Helpers
 
-Simple helpers that just delegate to the ActionView's FormBuilder:
-  hidden_field, date_select, datetime_select, text_field, text_area,
-  check_box, secure_password
+* Simple helpers that just delegate to the ActionView's FormBuilder:
+  +hidden_field+, +date_select+, +datetime_select+, +text_field+, +text_area+,
+  +check_box+, +secure_password+.
 
-+select+ and +radio_group+ operate in basically the same way; they both
-provide a method of selecting one out of several choices (ignoring
-select :multiple, that is). Note that select's list of choices, normally
-the second parameter to the select helper, has been relegated to a
-:choices entry in the options, for API consistency.
+* +select+ and +radio_group+ operate in basically the same way; they both
+  provide a method of selecting one out of several choices (ignoring
+  <tt>select :multiple</tt>, that is). Note that select's list of choices,
+  normally the second parameter to the select helper, has been relegated to a
+  <tt>:choices</tt> entry in the options, for API consistency.
 
-+static_text+ just outputs an HTML-escaped string representation of the
-field's value. It is useful both for read-only fields in forms, and as
-the primary helper in lists.
+* +static_text+ just outputs an HTML-escaped string representation of the
+  field's value. It is useful both for read-only fields in forms, and as the
+  primary helper in lists.
 
-+auto_field+, as discussed above, will automatically select a suitable
-field helper, based on the column and association metadata. Where there
-are multiple suitable candidates, it tries to go for the more
-generally-applicable choice (for example, it favours a +select+ over a
-+radio_group+ for a belongs_to association).
+* +auto_field+, as discussed above, will automatically select a suitable field
+  helper, based on the column and association metadata. Where there are
+  multiple suitable candidates, it tries to go for the more
+  generally-applicable choice (for example, it favours a +select+ over a
+  +radio_group+ for a +belongs_to+ association).
 
-+static_image+ sports a number of options used to build an hash suitable for
-the +tag+ helper responsible for the creation of final <img> tag: :controller
-(default "auto_admin") and :action (default "edit") allows to select a
-controller which should return the image based upon this object's id; :src
-override the previous two options and can be used with any URL, static or
-dynamic; with :size one can write the width and height used to show the image
-(format: "XxY"); :alt, which defaults to this object's to_label(). Everything
-else is passed as is to the +tag+ helper (so one could use :style or :class to
-alter the looks of <img>). This helper accepts a block, with a single
-parameter (this object), which can be used to return an hash to be merged into
-the options that are about to be passed to the tag helper.
+* +static_image+ sports a number of options used to build an hash suitable for
+  the +tag+ helper responsible for the creation of final <tt><img></tt> tag:
 
-None of the following actually work, but they're defined, waiting for me
-to come back and write them. +html_area+ will eventually use FCKeditor
-by default, and presumably the file/image fields will delegate to
-file_column.
-  html_area, hyperlink, file_field, image_field,
-  static_file, static_html
+  * <tt>:controller</tt> (default "auto_admin") and :action (default "edit")
+    allows to select a controller which should return the image based upon
+    this object's id;
+
+  * :src override the previous two options and can be used with any URL,
+    static or dynamic;
+
+  * with :size one can write the width and height used to show the image
+    (format: "XxY");
+
+  * :alt, which defaults to this object's to_label().
+
+  Everything else is passed as is to the +tag+ helper (so one could use
+  <tt>:style</tt> or <tt>:class</tt> to alter the looks of <tt><img></tt>).
+  This helper accepts a block, with a single parameter (this object), which
+  can be used to return an hash to be merged into the options that are about
+  to be passed to the tag helper.
+
+* None of the following actually work, but they're defined, waiting for me to
+  come back and write them. +html_area+ will eventually use FCKeditor by
+  default, and presumably the file/image fields will delegate to file_column:
+  +html_area+, +hyperlink+, +file_field+, +image_field+, +static_file+,
+  +static_html+.
 
 
 == How does it work? - Part II, Themes
@@ -311,45 +311,47 @@ selected in environment.rb) will be forthcoming Real Soon Now, though
 this section has ended up covering most of the basics.
 
 The 30 second summary -- a theme comprises:
-  FormBuilder (subclass of AutoAdminSimpleTheme::FormBuilder), to create
-  an Edit screen (a real form)
-  
-  TableBuilder (subclass of AutoAdmin::TableBuilder(FormBuilder)), to
-  create a List screen (a creative interpretation of "form", which seems
-  to map surprisingly well, for now). 
-  
-  FormProcessor (subclass of AutoAdminSimpleTheme::FormProcessor), which
-  implements the same set of helper methods as the FormBuilders, but
-  instead of returning HTML, its job is to perform any transformations
-  on the params hash to correspond with unusual form field
-  representations -- the base FormProcessor transforms keys referencing
-  associations to reference the underlying columns (actor -> actor_id),
-  for example. This class will often be empty, especially once I provide
-  a facility with which to inject custom field helpers (for composed_of
-  and maybe some belongs_to, mostly) into the base builder and
-  processor.
 
-  A complete set of views, including a layout, which delegate the hard
-  work to the FormBuilders.
+* FormBuilder (subclass of AutoAdminSimpleTheme::FormBuilder), to create an
+  Edit screen (a real form)
 
-  A 'public' directory, containing any required image, javascript, and
+* TableBuilder (subclass of AutoAdmin::TableBuilder(FormBuilder)), to create a
+  List screen (a creative interpretation of "form", which seems to map
+  surprisingly well, for now).
+
+* FormProcessor (subclass of AutoAdminSimpleTheme::FormProcessor), which
+  implements the same set of helper methods as the FormBuilders, but instead
+  of returning HTML, its job is to perform any transformations on the params
+  hash to correspond with unusual form field representations -- the base
+  FormProcessor transforms keys referencing associations to reference the
+  underlying columns (actor -> actor_id), for example. This class will often
+  be empty, especially once I provide a facility with which to inject custom
+  field helpers (for composed_of and maybe some belongs_to, mostly) into the
+  base builder and processor.
+
+* A complete set of views, including a layout, which delegate the hard work to
+  the FormBuilders.
+
+* A 'public' directory, containing any required image, javascript, and
   stylesheet assets.
 
-  A wrapper module, AutoAdmin#{name}Theme, which is responsible for:
-    * Containing the FormBuilders and FormProcessor
-    * Returning the full filesystem path to the 'views' and 'public'
-      directories
-    * Returing any theme-specific helpers, for injection into the
-      controller
-    * Injecting any theme-specific includes for ActiveRecord::Base
-      (I've proven this to be possible, though can't think of a sane
-      reason a theme would want to do so)
+* A wrapper module, AutoAdmin#{name}Theme, which is responsible for:
 
-Extending your theme module with AutoAdmin::ThemeHelpers will help to
-keep the module fairly DRY; it provides a +helper+ method, which can be
-given a list of modules and/or a block, and directs the 'view_directory'
-and 'asset_root' methods to a directory(*subdirs) singleton method,
-which you must define -- presumably using __FILE__.
+  * Containing the FormBuilders and FormProcessor
+
+  * Returning the full filesystem path to the 'views' and 'public' directories
+
+  * Returing any theme-specific helpers, for injection into the controller
+
+  * Injecting any theme-specific includes for ActiveRecord::Base (I've proven
+    this to be possible, though can't think of a sane reason a theme would
+    want to do so)
+
+Extending your theme module with AutoAdmin::ThemeHelpers will help to keep the
+module fairly DRY; it provides a +helper+ method, which can be given a list of
+modules and/or a block, and directs the 'view_directory' and 'asset_root'
+methods to a directory(*subdirs) singleton method, which you must define --
+presumably using \_\_FILE\_\_.
 
 NB: For good reasons that I can't remember right now, a couple of helper
 methods have APIs that don't match the standard Rails FormBuilder,
