@@ -1,6 +1,9 @@
 require 'faster_csv'
 
+# Simple module to save data in CSV format.
 module AutoAdminCsv
+  # Add a block into the plugin's controller's +respond_to+ construct, passing
+  # down the stream the +options+ set by users via the web interface.
   def self.save_as_proc controller, block_handler, options
     model = controller.model
     block_handler.csv do
@@ -9,6 +12,8 @@ module AutoAdminCsv
     end
   end
 
+  # Using FasterCSV in a rather inflexbile way we dump +collection+ into a
+  # single CSV stream.
   def self.export_into_csv_excel(controller, model, collection)
     content_type = tweak_csv_excel_content_type controller.request
     csv_content = FasterCSV.generate do |csv|
@@ -21,6 +26,8 @@ module AutoAdminCsv
       :filename => "#{model.human_name.downcase}.csv")
   end
 
+  # Microsoft Windows users will appreciate the fact that Excel can
+  # automatically handle the CSV file if we change the reply's content type.
   def self.tweak_csv_excel_content_type request
     if request.respond_to?(:user_agent)
       request.user_agent =~ /windows/i ? 'application/vnd.ms-excel' : 'text/csv'

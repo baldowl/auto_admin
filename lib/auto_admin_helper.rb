@@ -116,12 +116,15 @@ module AutoAdminHelper
     fields_for(nil, nil, opts, &proc)
   end
 
+  # Returns a link to the specific export action for the +format+ format. The
+  # link itself is not customizable.
   def save_as_link_to format
     link_to "Save as #{format.to_s.capitalize}", {:model => params[:model],
       :format => format, :filter => params[:filter], :sort => params[:sort],
       :sort_reverse => params[:sort_reverse], :search => params[:search]}
   end
 
+  # Returns an array of links to the export actions; see #save_as_link_to.
   def save_as_links
     AutoAdmin::AutoAdminConfiguration.save_as.map {|format| save_as_link_to(format)}
   end

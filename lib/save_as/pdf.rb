@@ -1,7 +1,10 @@
 Mime::Type.register 'application/pdf', :pdf
 require 'pdf/simpletable'
 
+# Simple module to save data in PDF format.
 module AutoAdminPdf
+  # Add a block into the plugin's controller's +respond_to+ construct, passing
+  # down the stream the +options+ set by users via the web interface.
   def self.save_as_proc controller, block_handler, options
     model = controller.model
     block_handler.pdf do
@@ -10,6 +13,8 @@ module AutoAdminPdf
     end
   end
 
+  # Using PDF::Writer in a rather inflexbile way we dump +collection+ into a
+  # single PDF stream.
   def self.export_into_pdf(controller, model, collection)
     pdf = PDF::Writer.new :paper => 'A4', :orientation => :landscape
     pdf.select_font "Times-Roman"

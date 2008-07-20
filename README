@@ -134,9 +134,9 @@ few lines to the bottom of your environment.rb or in an initializer file:
   end
 
 Having done that, you can now (re-)start <tt>script/server</tt>, and navigate
-to http://localhost:3000/admin/. Yes, it installs its own routes. Yes, they're
-hard-coded. Yes, that needs to change... for now, just don't try to use
-<tt>/admin/</tt> for anything else. :)
+to http://localhost:3000/admin/. Yes, it installs its own routes, but they are
+partially configurable; for now, just don't try to use <tt>/admin/</tt> for
+anything else.
 
 To customise which fields appear in the edit and list screens, you go on
 to...

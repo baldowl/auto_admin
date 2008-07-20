@@ -6,11 +6,18 @@ def self.config
 end
 module AutoAdminConfiguration
   DefaultTheme = :django
+
+  # Returns the name of the active theme module.
   def self.theme; Object.const_get("AutoAdmin#{theme_name.to_s.camelize}Theme"); end
+
+  # Returns the name of the active theme.
   def self.theme_name; @@theme ||= DefaultTheme; end
+
+  # Change the name of the active theme.
   def self.theme=(theme_name)
     @@theme = theme_name.to_sym
   end
+
   def self.form_processor; theme::FormProcessor; end
   def self.form_builder; theme::FormBuilder; end
   def self.table_builder; theme::TableBuilder; end
@@ -20,26 +27,80 @@ module AutoAdminConfiguration
   def self.controller_includes; theme.respond_to?( :controller_includes ) ? [theme.controller_includes].flatten : []; end
 
   Site = Struct.new(:url, :short_url, :name)
+
+  # Set the basic informations about this site. Use it as:
+  #
+  #   AutoAdmin.config do |admin|
+  #     admin.set_site_info 'http://www.example.com/', 'example.com',
+  #       'Administration area for example.com'
+  #   end
   def self.set_site_info full_url, site_name, admin_site_title='Site Administration'
     self.site = Site.new(full_url, site_name, admin_site_title)
   end
+
+  # Returns informations set by #set_site_info
   def self.site; @@site ||= raise("AutoAdmin not configured: site info not set"); end
+
+  # Lowlevel way to set informations about this site. Use #set_site_info.
   def self.site= new_value; @@site = new_value; end
+
+  # Returns the list of models managed through the auto_admin interface.
   def self.primary_objects; @@primary_objects ||= []; end
+
+  # Set the list of models available through the auto_admin interface. Use it
+  # as:
+  #
+  #   AutoAdmin.config do |admin|
+  #     admin.primary_objects = %w(actor film user)
+  #   end
   def self.primary_objects= new_value; @@primary_objects = new_value; end
+
   def self.admin_model; @@admin_model ||= nil; end
+
+  # Set the application model used to authenticate the users. Use it as:
+  #
+  #   AutoAdmin.config do |admin|
+  #     admin.admin_model = account
+  #   end
+  #
+  # See also #admin_model_id=.
   def self.admin_model=(new_value)
     @@admin_model = new_value.to_s.camelize.constantize
   end
+
   def self.admin_model_id; @@admin_model_id ||= nil; end
+
+  # Set the string/symbol used to store the admin object's id into the
+  # session. Use it as:
+  #
+  #   AutoAdmin.config do |admin|
+  #     admin.admin_model_id = :account_id
+  #   end
+  #
+  # See also #admin_model=.
   def self.admin_model_id=(new_value)
     @@admin_model_id = new_value.to_sym
   end
+
   def self.controller_super_class; @@controller_super_class ||= ActionController::Base; end
   def self.controller_super_class=(klass); @@controller_super_class = klass; end
+
+  # The string used as prefix in the custom routes; defaults to +admin+.
   def self.url_prefix; @@url_prefix ||= 'admin'; end
+
+  # Set the string used as prefix in the custom routes.
   def self.url_prefix= new_value; @@url_prefix = new_value; end
+
+  # Set the list of formats used by the optional export mechanism. Use it as:
+  #
+  #   AutoAdmin.config do |admin|
+  #     admin.save_as = %w(pdf csv)
+  #   end
+  #
+  # For the availabe formats see the content of save_as directory in the
+  # plugin home.
   def self.save_as=(formats); @@save_as_formats = formats; end
+
   def self.save_as; @@save_as_formats ||= []; end
   def self.model name
     Object.const_get( name.to_s.camelcase )
