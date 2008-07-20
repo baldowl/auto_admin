@@ -7,7 +7,7 @@ end
 module AutoAdminConfiguration
   DefaultTheme = :django
 
-  # Returns the name of the active theme module.
+  # Returns the active theme module.
   def self.theme; Object.const_get("AutoAdmin#{theme_name.to_s.camelize}Theme"); end
 
   # Returns the name of the active theme.
@@ -21,9 +21,15 @@ module AutoAdminConfiguration
   def self.form_processor; theme::FormProcessor; end
   def self.form_builder; theme::FormBuilder; end
   def self.table_builder; theme::TableBuilder; end
+
+  # The view directory is actually dependent on the active theme.
   def self.view_directory; theme.view_directory; end
+
   def self.asset_root; theme.asset_root; end
+
+  # Returns the list of the active theme's helpers.
   def self.helpers; theme.respond_to?( :helpers ) ? [theme.helpers].flatten : []; end
+
   def self.controller_includes; theme.respond_to?( :controller_includes ) ? [theme.controller_includes].flatten : []; end
 
   Site = Struct.new(:url, :short_url, :name)
@@ -82,7 +88,15 @@ module AutoAdminConfiguration
     @@admin_model_id = new_value.to_sym
   end
 
+  # The plugin's controller super class; defaults to ActionController::Base.
   def self.controller_super_class; @@controller_super_class ||= ActionController::Base; end
+
+  # Allows to set another class as plugin's controller super class. Use it
+  # as:
+  #
+  #   AutoAdmin.config do |admin|
+  #     admin.controller_super_class = AlternativeController
+  #   end
   def self.controller_super_class=(klass); @@controller_super_class = klass; end
 
   # The string used as prefix in the custom routes; defaults to +admin+.
@@ -101,10 +115,14 @@ module AutoAdminConfiguration
   # plugin home.
   def self.save_as=(formats); @@save_as_formats = formats; end
 
+  # Returns the list of active export formats.
   def self.save_as; @@save_as_formats ||= []; end
+
+  # Turns a simple string into the model class.
   def self.model name
     Object.const_get( name.to_s.camelcase )
   end
+
   def self.grouped_objects
     objects = primary_objects.uniq.map { |po| model(po) }
     groups = objects.map { |o| o.object_group }.uniq.sort

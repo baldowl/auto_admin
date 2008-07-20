@@ -93,6 +93,14 @@ appropriately. So if other parts of your site do the same, things will Just
 Work.
 
 
+=== History
+
+Admins' actions are automatically recorded and shown if the optional
+<tt>admin_histories</tt> table is available.
+
+See AutoAdminController#history for details.
+
+
 == What do you need?
 
 To use AutoAdmin with Rails 2.* you need an extra plugin,

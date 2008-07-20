@@ -25,6 +25,9 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
   end
 
   before_filter :require_valid_user, :except => [ :login, :asset ]
+
+  # Used as a before filter to check if we have a valid user (i.e., an admin
+  # or something like that)
   def require_valid_user
     return unless has_user?
 
@@ -38,6 +41,8 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     end
     redirect_to :action => 'login', :model => nil unless valid_user
   end
+
+  # A valid user must pass these checks.
   def permit_user_to_access_admin user
     user &&
       (!user.respond_to?( :active? ) || user.active?) &&
@@ -222,6 +227,25 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     @object = params[:id] ? model.find( params[:id] ) : model.new
   end
 
+  # Returns a bunch (50, actually) of the latest records from the history
+  # table used to register admins' actions. To use this feature you need to
+  # add a database table like the following one:
+  #
+  #   create_table :admin_histories do |t|
+  #     t.column :obj_id, :integer
+  #     t.column :object_label, :string
+  #     t.column :model, :string
+  #     t.column :user_id, :integer
+  #     t.column :change, :string
+  #     t.column :description, :string
+  #     t.column :created_at, :datetime
+  #     t.column :updated_at, :datetime
+  #     t.column :lock_version, :integer, :default => 0
+  #   end
+  #
+  # *Nota* *Bene*: the <tt>:user_id</tt> *must* actually be
+  # <em><admin model></em>_id, i.e. the same value of
+  # AutoAdmin::AutoAdminConfiguration#admin_model_id.
   def history
     @object = params[:id] ? model.find( params[:id] ) : model.new
     @histories = AdminHistory.find :all, :conditions => ['model = ? AND obj_id = ?', params[:model], params[:id]], :order => 'admin_histories.created_at DESC', :limit => 50, :include => [*user_history_includes]
