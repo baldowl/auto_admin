@@ -25,6 +25,7 @@ module AutoAdminConfiguration
   # The view directory is actually dependent on the active theme.
   def self.view_directory; theme.view_directory; end
 
+  # The public directory is actually dependent on the active theme.
   def self.asset_root; theme.asset_root; end
 
   # Returns the list of the active theme's helpers.
@@ -123,6 +124,7 @@ module AutoAdminConfiguration
     Object.const_get( name.to_s.camelcase )
   end
 
+  # Yield the pairs (group, grouped objects) for each existing object group.
   def self.grouped_objects
     objects = primary_objects.uniq.map { |po| model(po) }
     groups = objects.map { |o| o.object_group }.uniq.sort
@@ -131,33 +133,50 @@ module AutoAdminConfiguration
       yield group, group_objects
     end
   end
+
   def self.append_features base
     super
     base.extend ClassMethods
   end
+
   module ClassMethods
+    # Allows to define the getter and setter methods for +name+, just like
+    # standard +attr_accessor+, but the getter method will return
+    # +default_value+ instead of +nil+.
     def self.defaulted_accessor name, default_value
       class_eval <<EVAL
         def #{name}; @#{name} ||= (respond_to?(:default_#{name}) ? default_#{name} : nil) || #{default_value}; end
         def #{name}= new_value; @#{name} = new_value; end
 EVAL
     end
+
+    # Gets/sets an alternative "human" name for the administered model.
     def human_name(v=nil); @human_name = v if v; @human_name ||= name.titleize; end
 
+    # Sets a list of accessor methods for arrays
     def self.array_accessor *names
       names.each {|name| defaulted_accessor name, '[]' }
     end
+
+    # Sets a list of accessor methods for arrays
     def self.hash_accessor *names
       names.each {|name| defaulted_accessor name, '{}' }
     end
+
     array_accessor :columns_for_search, :columns_for_filter
     hash_accessor :labels_for_columns, :custom_filter_defaults
+
+    # Sets the "starting" value for the already defined filters. Used
+    # internally, not for public consumption.
     def filter_defaults
       f = {}
       columns_for_filter.each { |c| f[c.to_s] = '*' }
       custom_filter_defaults.each { |k,v| f[k.to_s] = v.to_s }
       f
     end
+
+    # Sets the listable column list for the administered object. Used
+    # internally, not for public consumption.
     def default_columns_for_list
       columns = content_columns.select {|c| c.type != :binary }.map {|c| c.name}
       #reflect_on_all_associations.select {|a| a.macro == :belongs_to }.each do |assoc|
@@ -165,15 +184,35 @@ EVAL
       #end
       columns
     end
+
+    # Instructs the list view to sort on the specified column by default.
     def sort_by column, reverse=false; @sort_column = column.to_s; @sort_reverse = reverse; end
+
+    # Adds rudimentary text searching across the named columns. Note that this
+    # defines a <tt>search(many, query, options={})</tt> wrapper around
+    # model's <tt>find(many, options)</tt>
     def search_by *columns; extend Searchable; @columns_for_search = columns; end
+
+    # Allows filtering of the list screen by the named columns; filtering
+    # currently works for: custom, boolean, date, belongs_to, has_one, and
+    # string. Note that the last three will do rather nasty and sub-optimal
+    # queries to determine the filter options.
     def filter_by *columns; @columns_for_filter = ensure_columns_are_filterable!(columns); end
+
+    # Used internally to check the filtering configuration, not for public
+    # consumption.
     def ensure_columns_are_filterable! columns
       columns.each do |col|
         raise "Unable to filter #{self} on column '#{col}'" unless filter_type( col )
       end
     end
+
+    # Takes a hash of (column, value) pairs, to default a filter to something
+    # other than 'All'.
     def default_filter filters; custom_filter_defaults.update filters.stringify_keys; end
+
+    # Sets the list of columns shown on the list screen. Takes either a
+    # simple list of column names, or a Field Definition Block.
     def list_columns(*columns, &proc)
       if block_given? || !columns.empty?
         @list_fieldset = ListFieldset.new(self, columns, proc)
@@ -181,16 +220,31 @@ EVAL
         @list_fieldset || ListFieldset.new(self, default_columns_for_list)
       end
     end
+
+    # Sets custom labels for the administered model's columns. Takes an hash
+    # like
+    #
+    #   {:column1 => 'column label', :column2 => 'column label'}
+    #
+    # Use either symbols or strings for the keys.
     def column_labels labels; labels_for_columns.update labels.stringify_keys; end
+
+    # Returns the column label.
     def column_label column; labels_for_columns[column.to_s] || default_column_label( column.to_s ); end
+
+    # Returns the default column label, derived from the column's name.
     def default_column_label column
       label = column.to_s.humanize
       label = "Date #{label.downcase}" if label.gsub!(/ on$| at$/, '')
       label
     end
 
+    # Given a string representing a column's name, returns the corresponding
+    # column object.
     def find_column name; name &&= name.to_s.sub(/\?$/, ''); columns.find { |c| name == c.name }; end
 
+    # Builds up the condition array used by +find+ to retrive the selected
+    # records.
     def filter_conditions filter_hash
       statement_parts = []
       parameters = []
@@ -205,19 +259,32 @@ EVAL
       [ statement_parts.join( ' AND '), *parameters ] unless statement_parts.empty?
     end
 
+    # Given a column name and a potential value, returns the couple
+    #
+    #   ["sql fragment with placeholder", value]
     def filter_option_sql column_name, option_name
       filter_instance(column_name).sql(option_name)
     end
 
+    # Specifies a fixed set of choices to be offered as filter options instead
+    # of automatically working it out. +custom_options+ musth be a (value,
+    # label) hash. The optional block will be given each value in turn, and
+    # should return an SQL condition fragment.
     def filter_options_for column_name, custom_options, &block
       (@custom_filter_options ||= {})[column_name.to_sym] = AutoAdmin::CustomFilterSet.new( self, reflect_on_association( column_name ) || find_column( column_name ), custom_options, &block )
     end
+
     def dynamic_filter_options_for column_name, &block
       filter_options_for( column_name, block )
     end
+
+    # Returns an array of filter objects for the adminstered model.
     def filters
       columns_for_filter.map { |col| filter_instance( col ) }
     end
+
+    # Returns an object representing the filter (custom or not) for the given
+    # column.
     def filter_instance column_name
       column_name = column_name.to_sym
       return @custom_filter_options[column_name] if @custom_filter_options && @custom_filter_options.has_key?( column_name )
@@ -239,6 +306,8 @@ EVAL
 
       klass.new( self, reflect_on_association( column_name ) || find_column( column_name ) ) {|col| find_column(col) }
     end
+
+    # Returns the type of the potential filter to use on +column_name+.
     def filter_type column_name
       column_name = column_name.to_sym
       return :custom if @custom_filter_options && @custom_filter_options.has_key?( column_name )
@@ -254,6 +323,8 @@ EVAL
     def sort_column; defined?( @sort_column ) ? @sort_column : (default_sort_info[:column] rescue nil); end
     def sort_reverse; defined?( @sort_column ) ? @sort_reverse : (default_sort_info[:reverse] rescue nil); end
 
+    # Gets/sets the per-page item number used by the pagination mechanism in
+    # the list screens.
     def paginate_every(n=nil); @paginate = n if n; @paginate || 20; end
 
     array_accessor :admin_fieldsets
@@ -265,6 +336,9 @@ EVAL
       sets = default_admin_fieldsets + sets unless sets.find {|s| s.fieldset_type == :input }
       sets
     end
+
+    # Returns the list of columns to show by default on the edit screen, i.e.
+    # everything but the ActiveRecord's magic fields.
     def default_columns_for_edit
       magic_fields = %w(created_at created_on updated_at updated_on) + [locking_column, inheritance_column]
       columns = content_columns.map {|c| c.name} - magic_fields
@@ -273,28 +347,62 @@ EVAL
       end
       columns
     end
+
+    # Defines a fieldset for edit views. Takes either a simple list of column
+    # names, or a Field Definition Block. For simple use, you can just give it
+    # a list of columns, which will be rendered using auto_field.
+    #
+    #   admin_fieldset :first_name, :last_name, :active, :store
+    #
+    # or
+    #
+    #   admin_fieldset do |b|
+    #     b.text_field :first_name
+    #     b.text_field :last_name
+    #     b.auto_field :active
+    #     b.select :store
+    #   end
     def admin_fieldset label='', *columns, &proc
       set = InputFieldset.new( self, label, columns.map {|c| c.to_s }, proc )
       (@admin_fieldsets ||= []) << set
     end
+
+    # Defines a fieldset for edit views, to show a table of items from a child
+    # collection. It uses a Field Definition Block to declare what columns
+    # should be shown. Generally, you'd want to use the static_text helper, I
+    # suspect. *WARNING*: This has no tests, and I'm almost certain it will
+    # break horribly if you try to use anything other than static_text.
     def admin_child_table label, collection, options={}, &proc
       (@admin_fieldsets ||= []) << TableFieldset.new( self, label, collection, proc, options )
     end
+
+    # Defines a "fieldset" for edit views, to show *several* fieldsets, each
+    # containing one object from a child collection. It uses a Field
+    # Definition Block to declare what columns should be shown. I don't think
+    # it'd be wise to use this on a large collection, but it's your
+    # application. :) *WARNING*: This also has no tests, and I believe it will
+    # break horribly if you try to use it at all.
     def admin_child_form collection, options={}, &proc
       (@admin_fieldsets ||= []) << ChildInputFieldset.new( self, collection, proc, options )
     end
 
+    # Declares which 'object group' this object belongs to, for use in the
+    # interface. Currently, this is used to group together related objects on
+    # the index page.
     def object_group new_group=nil
       @object_group = new_group if new_group
       @object_group || ''
     end
 
+    # Represents the list of fields to show on the list view.
     class ListFieldset
       attr_accessor :object, :fields, :options, :proc
       def initialize object, fields=[], proc=nil
         @options = fields.last.is_a?(Hash) ? fields.pop : {}
         @object, @fields, @proc = object, fields, proc
       end
+
+      # Assembles the field list using a custom form +builder+.
       def build builder
         builder.fieldset( :table ) do
           fields.each {|f| builder.static_text f } if fields
@@ -302,26 +410,44 @@ EVAL
         end
       end
     end
+
+    # Represents the collection of fields to show on the edit view.
     class InputFieldset
       attr_accessor :object, :name, :fields, :options, :proc
       def initialize object, name, fields=[], proc=nil
         @options = fields.last.is_a?(Hash) ? fields.pop : {}
         @object, @name, @fields, @proc = object, name, fields, proc
       end
+
+      # Assembles the form's field using a custom form +builder+.
       def build builder
         builder.fieldset( :fields, name != '' ? name : nil ) do
           fields.each {|f| builder.auto_field f } if fields
           proc.call( builder ) if proc
         end
       end
+
+      # The type of this fieldset, used to distinguish it from the other
+      # custom fieldset.
       def fieldset_type; :input; end
     end
+
+    # Represents the collection of fieldsets to show on the edit view in the
+    # child form. It defaults to build a read-only collection.
+    #
+    # Recognized options:
+    # * <tt>:read_only</tt> (defaults to +true+): control whether the child
+    #   records can be modified and/or added to;
+    # * <tt>:blank_records</tt> (defaults to 3): control how many new/blank
+    #   record to show if the child form is not read-only.
     class ChildInputFieldset
       attr_accessor :object, :field, :proc, :options
       DEFAULT_CHILD_OPTIONS = { :read_only => true }.freeze
       def initialize object, field, proc, options
         @object, @field, @proc, @options = object, field, proc, DEFAULT_CHILD_OPTIONS.merge(options)
       end
+
+      # Assembles the single child's fieldset.
       def build_object(builder, obj, idx, caption)
         builder.inner_fields_for( field.to_s + '_' + idx, obj ) do |inner|
           inner.fieldset( :fields, caption ) do
@@ -330,6 +456,8 @@ EVAL
           end
         end
       end
+
+      # Assembles the child form's fieldsets using a custom form +builder+.
       def build builder, children=nil
         children ||= builder.object.send( field )
         idx = -1
@@ -348,17 +476,31 @@ EVAL
           end
         end
       end
+
+      # The type of this fieldset, used to distinguish it from the other
+      # custom fieldset.
       def fieldset_type; :child_input; end
+
+      # Returns the number of new, blank records to show in the fieldset if
+      # it's not <tt>:read_only</tt>. Customizable via
+      # <tt>:blank_records</tt>.
       def blank_records; options[:read_only] ? 0 : options[:blank_records] || 3; end
     end
+
+    # Represents the collection of fieldsets to show on the edit view in the
+    # child table.
     class TableFieldset < ChildInputFieldset
       attr_accessor :name
       def initialize object, name, field, proc, options
         @name = name
         super object, field, proc, options
       end
+
+      # The type of this fieldset, used to distinguish it from the other
+      # custom fieldset.
       def fieldset_type; :tabular; end
 
+      # Assembles the single child's fieldset.
       def build_object(builder, obj, idx, caption)
         name = field.to_s.dup
         name << '[' << idx.to_s << ']' if idx
@@ -369,6 +511,8 @@ EVAL
           end
         end
       end
+
+      # Assembles the child form's fieldsets using a custom form +builder+.
       def build builder
         children = builder.object.send( field )
         builder.fieldset( :table, name ) do
@@ -388,6 +532,7 @@ EVAL
       end
     end
 
+    # The crude search mechanism.
     module Searchable
       def append_search_condition!(query, options={})
         unless query.empty?
@@ -411,8 +556,7 @@ EVAL
       end
     end
   end
+
   ::ActiveRecord::Base.send :include, self
 end
 end
-
-
