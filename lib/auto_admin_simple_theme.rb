@@ -64,13 +64,12 @@ module AutoAdmin
     #def self.append_features base
     #  # I don't think I actually need this cleverness...
     #  instance_methods(false).each do |meth|
-    #    base.class_eval <<-end_src, __FILE__, __LINE__
-    #      alias :shadow_#{meth} :#{meth}
-    #    end_src
+    #    base.class_eval "alias :shadow_#{meth} :#{meth}", __FILE__, __LINE__
     #  end
     #  super
     #end
   end
+
   def self.TableBuilder(form_builder)
     klass = Class.new(form_builder)
     klass.send :include, TableBuilder
@@ -251,12 +250,14 @@ module AutoAdmin
       super
     end
     def date_select(field, options = {})
+      options[:include_blank] = true
       common_option_translations! options
-      super
+      super(field, options)
     end
     def datetime_select(field, options = {})
+      options[:include_blank] = true
       common_option_translations! options
-      super
+      super(field, options)
     end
     def text_field_with_auto_complete(field, options = {})
       common_option_translations! options
