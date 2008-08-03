@@ -1,4 +1,6 @@
 module AutoAdminHelper
+  # Returns the +name+ model class. Usually the +name+ parameter is
+  # unnecessary as the right value is taken from the HTTP request.
   def model name=nil
     AutoAdmin::AutoAdminConfiguration.model( name || params[:model] )
   end
@@ -8,28 +10,34 @@ module AutoAdminHelper
   def has_history?
     AdminHistory rescue nil
   end
+
+  # Simple check: no user model, no authentication needed.
   def has_user?
     AutoAdmin::AutoAdminConfiguration.admin_model
   end
 
-
+  # Returns the Site object set up in the global configuration.
   def site
     AutoAdmin::AutoAdminConfiguration.site
   end
+
+  # Returns the logged in user, if any.
   def user
     session[AutoAdmin::AutoAdminConfiguration.admin_model_id] ? AutoAdmin::AutoAdminConfiguration.admin_model.find(session[AutoAdmin::AutoAdminConfiguration.admin_model_id]) : nil
   end
+
+  # Returns the human name of the given model +name+, optionally pluralizing
+  # it.
   def human_model name=nil, pluralize=false
     s = model(name).human_name
     s = s.pluralize if pluralize && pluralize != 1
     s
   end
 
-
-
-
-
-
+  # Returns the HTML-escaped value of +object+'s +field+ with or without the
+  # value's Ruby class. +explicit_none+ controls how a nil/empty value is
+  # represented to the caller: the explicit, hardcoded string '(none)' or an
+  # empty string (default behaviour).
   def value_html_for object, field, explicit_none=false, return_klass=false
     value = object.send(field)
     value = value.to_label if value.is_a? ActiveRecord::Base
@@ -52,30 +60,53 @@ module AutoAdminHelper
     return *ret
   end
 
+  # Returns the hash used by +link_to+ to produce the link for the list view
+  # of the current model.
   def list_page_for_current
     list_page_for params[:model]
   end
+
+  # Returns the hash used by +link_to+ to produce the link for the list view
+  # of the given model.
   def list_page_for model
     param_hash_to_link_hash( (session[:admin_list_params] || {})[model] || {} ).merge( :action => 'list', :model => model )
   end
+
+  # Returns the hash used by +link_to+ to produce the link to the current list
+  # view.
   def current_list_page
     param_hash_to_link_hash params
   end
+
+  # Trasforms the current list page "parameters", i.e., the hash used by
+  # +link_to+ to produce the URL of the current view, in a number of hidden
+  # fields.
   def current_list_page_as_fields *skip_keys
     link_hash_to_hidden_fields current_list_page, skip_keys + [:controller, :action, :model, :id]
   end
+
+  # Returns the hash used by +link_to+ to produce the link to a similar list
+  # view, changing just the +options_changed+, which must be a hash.
   def similar_list_page options_changed
     param_hash_to_link_hash params.merge( options_changed )
   end
+
+  # Returns the hash used by +link_to+ to produce the link to a similar list
+  # view, just filtered by the given parameters.
   def similar_list_page_with_filter column, option
     filter_hash = (params[:filter] || {}).dup
     filter_hash[column] = option
     filter_hash.delete column unless option
     similar_list_page :filter => filter_hash
   end
+
+  # Returns an array of form hidden fields corresponding to the hash members.
   def link_hash_to_hidden_fields hash, skip_keys=[]
     hash.reject {|k,v| skip_keys.include? k.to_sym }.to_a.map {|pair| hidden_field_tag pair[0], pair[1] }.join( "\n" )
   end
+
+  # Simplifies the hash, purging the unneeded options whose values are just
+  # default ones.
   def param_hash_to_link_hash hash
     hash = hash.dup
     if klass = hash[:model] && model( hash[:model] )
@@ -99,7 +130,7 @@ module AutoAdminHelper
     hash
   end
 
-
+  # Custom replacement of +form_for+.
   def admin_form_for(object_name, object, options={}, &proc)
     opts = { :builder => DeclarativeFormBuilder,
       :inner_builder => AutoAdmin::AutoAdminConfiguration.form_builder,
@@ -108,6 +139,8 @@ module AutoAdminHelper
     }.update(options)
     form_for(object_name, object, opts, &proc)
   end
+
+  # Custom replacement of +fields_for+.
   def admin_table(options={}, &proc)
     opts = { :builder => DeclarativeFormBuilder,
       :inner_builder => AutoAdmin::AutoAdminConfiguration.table_builder,
