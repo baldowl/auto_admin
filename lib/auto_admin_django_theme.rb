@@ -1,3 +1,4 @@
+# The Django-based theme module.
 module AutoAdminDjangoTheme
   extend AutoAdmin::ThemeHelpers
   def self.directory(*subdirs)
@@ -5,12 +6,17 @@ module AutoAdminDjangoTheme
   end
 
   helper do
+    # Given an AdminHistory instance, it builds the history link which lands
+    # the user right into the edit form for the related administered model
+    # object.
     def history_link record
       link = "(Unnamed #{human_model(record.model).downcase})"
       link = record.object_label unless record.object_label.blank?
       link = link_to h(link), :model => record.model, :action => 'edit', :id => record.obj_id unless record.change == 'delete'
       link
     end
+
+    # Tweaks the CSS class used for the history items.
     def history_link_class record
       case record.change
         when 'add'; 'addlink'
@@ -20,8 +26,12 @@ module AutoAdminDjangoTheme
     end
   end
 
+  # Nothing special to do to user's data before saving them.
   class FormProcessor < AutoAdminSimpleTheme::FormProcessor
   end
+
+  # Custom FormBuilder used to assemble the administered model editing form
+  # sewing together the pieces.
   class FormBuilder < AutoAdminSimpleTheme::FormBuilder
     def fieldset_class(style)
       case style
@@ -79,6 +89,9 @@ module AutoAdminDjangoTheme
         %(<div class="form-row">#{inner}</div>)
       end
     end
+
+    # Used for fields which must not be wrapped in the Django-based theme's
+    # divs.
     def static_text_without_theme(field, options = {})
       v = @object.send(field)
       if v == true || v == false
@@ -89,6 +102,8 @@ module AutoAdminDjangoTheme
       end
     end
   end
+
+  # Custom FormBuilder used to assemble the administered model list view.
   class TableBuilder < AutoAdmin::TableBuilder(FormBuilder)
     def table_header(field_type, field_name, options)
       klass = ''
@@ -152,4 +167,3 @@ module AutoAdminDjangoTheme
     end
   end
 end
-
