@@ -85,12 +85,13 @@ case), you must specify it with the <tt>admin_model=</tt> and
 class must respond to +authenticate+, +login+, or
 +find_by_username_and_password+ and that method must take two strings and
 return +nil+ for failure or a non-false value for success. It *must* return
-the authenticated user's id -- the id will be stored in the session using the
-key provided by +admin_model_id+ and the currently logged-in user will be
-looked for; if the returned value responds to one or more of <tt>active?</tt>,
-<tt>enabled?</tt>, <tt>disabled?</tt> or <tt>admin?</tt>, they will be treated
-appropriately. So if other parts of your site do the same, things will Just
-Work.
+the authenticated user's id (or, in a less ideal turn, the user object
+itself: we will extract the id by ourself) -- the id will be stored in the
+session using the key provided by +admin_model_id+ and the currently
+logged-in user will be looked for; if the returned value responds to one or
+more of <tt>active?</tt>, <tt>enabled?</tt>, <tt>disabled?</tt> or
+<tt>admin?</tt>, they will be treated appropriately. So if other parts of
+your site do the same, things will Just Work.
 
 
 === History

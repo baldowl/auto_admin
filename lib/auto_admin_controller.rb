@@ -75,7 +75,10 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
   def login
     if request.post?
       auth_method = [ :authenticate, :login ].detect {|m| AutoAdmin::AutoAdminConfiguration.admin_model.respond_to? m }
-      if session[AutoAdmin::AutoAdminConfiguration.admin_model_id] = AutoAdmin::AutoAdminConfiguration.admin_model.send( auth_method || :find_by_username_and_password, params[:username], params[:password] )
+      maybe_user_id = AutoAdmin::AutoAdminConfiguration.admin_model.send(auth_method || :find_by_username_and_password, params[:username], params[:password])
+      if maybe_user_id
+        maybe_user_id = maybe_user_id.id if maybe_user_id.instance_of?(AutoAdmin::AutoAdminConfiguration.admin_model)
+        session[AutoAdmin::AutoAdminConfiguration.admin_model_id] = maybe_user_id
         redirect_to :action => 'index'
       end
 
