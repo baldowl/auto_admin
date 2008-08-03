@@ -58,6 +58,9 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
   def user_history_identity
     { AutoAdmin::AutoAdminConfiguration.admin_model_id => (user && user.id) }
   end
+
+  # Returns the latest +num+ records from the +admin_histories+ table; they're
+  # usually displayed in the "index" view by the active theme.
   def user_history_items(num=10)
     conditions = []
     condition_values = []
@@ -91,6 +94,8 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     redirect_to :action => 'index'
   end
 
+  # Ancillary class used to scour the administered model for related class and
+  # collect the results
   class AssociationCollector
     attr_reader :model, :associations
     def initialize(model)
@@ -106,6 +111,9 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     collector.associations
   end
   private :collect_associations_for_model
+
+  # Handles the basic listing view, creatively building the +find+ options
+  # object from the request parameters.
   def list
     params[:filter] ||= {}
     params[:filter] = model.filter_defaults.merge(params[:filter])
@@ -292,4 +300,3 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
     send_file filename, :type => mime_type
   end
 end
-
