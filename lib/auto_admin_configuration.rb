@@ -538,7 +538,7 @@ EVAL
         unless query.empty?
           conditions = options[:conditions] || []
           conditions = [conditions] unless conditions.is_a? Array
-          new_condition = '(' + columns_for_search.map { |col| "#{col} ILIKE ?" }.join( ' OR ' ) + ')'
+          new_condition = '(' + columns_for_search.map { |col| "#{col} LIKE ?" }.join( ' OR ' ) + ')'
           if conditions.size > 0
             conditions[0] = "(#{conditions[0]}) AND (#{new_condition})"
           else
