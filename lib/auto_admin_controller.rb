@@ -152,7 +152,7 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
       end
 
       # Save attributes on the primary object
-      @object.attributes = params[params[:model]]
+      @object.send :attributes=, params[params[:model]], false
       unless @object.save
         flash[:warning] = "Failed to update the #{human_model.downcase} \"#{@object.to_label}\". "
         render :action => 'edit' and return
@@ -194,7 +194,10 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
             end
 
             o = child_id ? child_class.find( child_id ) : children.build
-            unless o.update_attributes child_info
+            
+            # update attributes, ignoring protected
+            o.send :attributes=, child_info, false
+            unless o.save
               set_name = 'Child list'
               set_name = set.name if set.respond_to?(:name) && !set.name.blank?
               flash[:warning] = "Failed to #{o.new_record? ? 'add' : 'change'} the #{o.class.name.titleize.downcase} \"#{o.to_label}\" (#{set_name})"
