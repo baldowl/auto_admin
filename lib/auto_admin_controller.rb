@@ -229,7 +229,7 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
 
     if params[:_continue]
       flash[:notice] << "You may edit it again below."
-      redirect_to :action => 'edit'
+      redirect_to :action => 'edit', :id => @object.id
     elsif params[:_addanother]
       flash[:notice] << "You may add another #{human_model.downcase} below."
       redirect_to :action => 'edit', :id => nil
