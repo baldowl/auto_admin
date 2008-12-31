@@ -4,6 +4,7 @@
 <head>
   <title><%=h @title ? "#{@title} | " : '' %><%=h site.name %></title>
   <%= tag("link", { "rel" => "Stylesheet", "type" => "text/css", "media" => "screen", "href" => url_for( :action => 'asset', :path => 'stylesheets/auto_admin.css', :escape => false ) } ) %>
+  <%= javascript_include_tag :defaults %>
 </head>
 
 <body class="<%=h @body_class %>">

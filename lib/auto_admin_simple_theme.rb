@@ -259,6 +259,28 @@ module AutoAdmin
       common_option_translations! options
       super(field, options)
     end
+
+    # To use this helper there must be a separate controller which provides
+    # the completion data. Let's say we have the Item model, with a :name
+    # attribute for which we want autocompletion, and that there's the
+    # ItemsControler; we should add
+    #
+    #   auto_complete_for :item, :name
+    #
+    # to the controller. Then, in the Item model we should add
+    #
+    #   admin_fieldset do |b|
+    #     b.text_field_with_auto_complete :name,
+    #       :completion => {:url => {:controller => 'items',
+    #         :action => 'auto_complete_for_item_name'}}
+    #     # ...
+    #   end
+    #
+    # If our design is REST-like, we must tweak the resources' definitions or
+    # add a specific route for this action to work:
+    #
+    #  map.resources :items,
+    #    :collection => {:auto_complete_for_item_name => :post}
     def text_field_with_auto_complete(field, options = {})
       common_option_translations! options
       completion_options = options.delete(:completion) || {}

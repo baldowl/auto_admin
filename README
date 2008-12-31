@@ -108,6 +108,10 @@ To use AutoAdmin with Rails 2.* you need an extra plugin,
 will_paginate[git://github.com/mislav/will_paginate.git], because the
 pagination mechanism has been removed from the Rails core base.
 
+To use the +text_field_with_auto_complete+ helper you need an extra plugin,
+auto_complete[git://github.com/rails/auto_complete.git], because the
+autocompletion mechanism has been removed from the Rails core base.
+
 For the optional export mechanism you also need:
 
 * the *faster_csv* gem for the CSV export module;
@@ -297,6 +301,20 @@ reasons.
   This helper accepts a block, with a single parameter (this object), which
   can be used to return an hash to be merged into the options that are about
   to be passed to the tag helper.
+
+* +text_field_with_auto_complete+ provides a simple text field with
+  autocompletion delegating all the work to the homonymous ActionView's
+  helper; there's a complication, however: there must be a separate controller
+  which provides the completion data:
+
+    b.text_field_with_auto_complete :name,
+      :completion => { :url => { :controller => 'items',
+                                 :action => 'auto_complete_for_item_name' }}
+
+  For information on this controller, see Rails documentation. Note that if
+  you designed your application in a REST-like way, you should tweak your
+  resources' definitios or add a specific route for the new
+  <tt>auto_complete_for_<em>model</em>_<em>field</em></tt>.
 
 * None of the following actually work, but they're defined, waiting for me to
   come back and write them. +html_area+ will eventually use FCKeditor by
