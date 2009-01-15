@@ -185,6 +185,9 @@ EVAL
       columns
     end
 
+    # Instructs the list view to meta-refresh this often
+    def refresh_time time=nil; if defined?(@refresh_time) ; then @refresh_time else @refresh_time = time ; end ; end
+
     # Instructs the list view to sort on the specified column by default.
     def sort_by column, reverse=false; @sort_column = column.to_s; @sort_reverse = reverse; end
 

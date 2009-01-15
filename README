@@ -18,6 +18,7 @@ Streamlined[http://streamlined.relevancellc.com/].
 
     def name; first_name + ' ' + last_name; end
 
+    refresh_time 5
     sort_by :last_name
     search_by :first_name, :last_name
     filter_by :active, :store
@@ -177,6 +178,9 @@ methods:
   Declares which 'object group' this object belongs to, for use in the
   interface. Currently, this is used to group together related objects on the
   index page.
+
+[refresh_time(seconds)]
+  Instructs the list view to meta-refresh with the specified delay.
 
 [sort_by(column, reverse=false)]
   Instructs the list view to sort on the specified column by default.

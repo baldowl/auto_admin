@@ -117,6 +117,7 @@ class AutoAdminController < AutoAdmin::AutoAdminConfiguration.controller_super_c
   def list
     params[:filter] ||= {}
     params[:filter] = model.filter_defaults.merge(params[:filter])
+    @auto_admin_refresh_time = model.refresh_time
     conditions = model.filter_conditions( params[:filter] )
     unless sort_column = model.find_column( params[:sort] )
       sort_column = model.find_column( params[:sort] = model.sort_column )
