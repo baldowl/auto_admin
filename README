@@ -106,11 +106,11 @@ See AutoAdminController#history for details.
 == What do you need?
 
 To use AutoAdmin with Rails 2.* you need an extra plugin,
-will_paginate[git://github.com/mislav/will_paginate.git], because the
-pagination mechanism has been removed from the Rails core base.
+will_paginate[http://github.com/mislav/will_paginate], because the pagination
+mechanism has been removed from the Rails core base.
 
 To use the +text_field_with_auto_complete+ helper you need an extra plugin,
-auto_complete[git://github.com/rails/auto_complete.git], because the
+auto_complete[http://github.com/rails/auto_complete], because the
 autocompletion mechanism has been removed from the Rails core base.
 
 For the optional export mechanism you also need:
@@ -213,12 +213,53 @@ methods:
 
 [list_columns(*columns, &proc)]
   Takes either a simple-list of column names, or a Field Definition Block (see
-  below)
+  next session) or both.
+
+  Please, note that a list of column names will produce a bunch of fields
+  using the +static_text+ helper almost for everything but the first column
+  (which will get a special treatment to allow you to access the "edit view").
+  If a column occurs more than once (summing up the list of column names and
+  the FDB), then that column will appear more than once:
+
+    list_columns :name, :code, :address do |f|
+      f.hyperlink :address
+    end
+
+  The previous code fragment will list the +address+ column twice: the first
+  one will be shown as static text, the second one will produce a real link.
+
+  At the moment, if you have a long list of columns and want to customize only
+  a few of them, you have to write then down one by one, even those that don't
+  need special care.
 
 [admin_fieldset(label='', *columns, &proc)]
   Defines a fieldset for edit views. For simple use, you can just give it a
   list of columns. Once you get started, you'll want to pass a Field
   Definition Block, though.
+
+  In the Field Definition Block you can get hold of the model instance using
+  the block's parameter; let's say the model has an attachment, handled by
+  paperclip[http://github.com/thoughtbot/paperclip], called +picture+ and you
+  want to show the image's URL like an hyperlink:
+
+    admin_fieldset do |f|
+      # ...
+      f.hyperlink :picture, :url => f.object.picture.url
+    end
+
+  At the moment, this does not work with +list_columns+.
+
+  Most of the helpers which accept or require a block will yield the model
+  instance to the block, if it requires a parameter:
+
+    admin_fieldset do |f|
+      # ...
+      f.static_image :picture do |cover|
+        {:src => cover.picture.url}
+      end
+    end
+
+  This works also with +list_columns+.
 
 [admin_child_table(label, collection, options={}, &proc)]
   Defines a fieldset for edit views, to show a table of items from a child
