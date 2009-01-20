@@ -213,7 +213,7 @@ methods:
 
 [list_columns(*columns, &proc)]
   Takes either a simple-list of column names, or a Field Definition Block (see
-  next session) or both.
+  next section) or both.
 
   Please, note that a list of column names will produce a bunch of fields
   using the +static_text+ helper almost for everything but the first column
