@@ -320,6 +320,16 @@ reasons.
   field's value. It is useful both for read-only fields in forms, and as the
   primary helper in lists.
 
+* +calculated_text+ requires a block to which it will yield the model
+  instance; the block's product will be treated like a string and
+  HTML-escaped.
+
+* +static_html+ is like +static_text+, but the final product will not be
+  HTML-escaped.
+
+* +calculated_html+ is like +calculated_text+, but the final product will not
+  be HTML-escaped.
+
 * +auto_field+, as discussed above, will automatically select a suitable field
   helper, based on the column and association metadata. Where there are
   multiple suitable candidates, it tries to go for the more
@@ -361,11 +371,22 @@ reasons.
   resources' definitios or add a specific route for the new
   <tt>auto_complete_for_<em>model</em>_<em>field</em></tt>.
 
+* +hyperlink+ automatically generates a link to the "edit view" of its first
+  argument (which must be one of the primary objects); alternatively you can
+  use the :url option to generate a custom link:
+
+    f.hyperlink :picture, :url => f.object.picture.url
+
+  Anyway, the link caption will be the URL itself, unless you use the option
+  :link_text as follow:
+
+    f.hyperlink :picture, :url => f.object.picture.url,
+      :link_text => 'The picture'
+
 * None of the following actually work, but they're defined, waiting for me to
   come back and write them. +html_area+ will eventually use FCKeditor by
   default, and presumably the file/image fields will delegate to file_column:
-  +html_area+, +hyperlink+, +file_field+, +image_field+, +static_file+,
-  +static_html+.
+  +html_area+, +file_field+, +image_field+, +static_file+.
 
 
 == How does it work? - Part II, Themes
