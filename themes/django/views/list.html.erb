@@ -9,7 +9,7 @@
 
 <% if model.searchable? %>
 <div id="toolbar"><form id="changelist-search" action="" method="get">
-  <label><%= image_tag url_for( :action => 'asset', :path => 'images/auto_admin/icon_searchbox.png', :escape => false ), :alt => 'Search for:', :title => 'Search' %></label>
+  <label><%= image_tag url_for( :action => 'asset', :path => %w(images auto_admin icon_searchbox.png)), :alt => 'Search for:', :title => 'Search' %></label>
   <%= text_field_tag :search, params[:search], :id => 'searchbar', :size => 40 %>
   <%= submit_tag 'Go', :name => nil %>
   <%= current_list_page_as_fields :search %>

@@ -96,7 +96,7 @@ module AutoAdminDjangoTheme
       v = @object.send(field)
       if v == true || v == false
         v = v ? 'Yes' : 'No'
-        helpers.send(:image_tag, helpers.send(:url_for, :escape => false, :action => :asset, :path => "images/auto_admin/icon-#{v.downcase}.gif" ), :alt => v, :title => v)
+        helpers.send(:image_tag, helpers.send(:url_for, :action => :asset, :path => %W(images auto_admin icon-#{v.downcase}.gif)), :alt => v, :title => v)
       else
         super
       end
@@ -130,7 +130,7 @@ module AutoAdminDjangoTheme
         <<-foo
         <a href="#" onclick="this.getElementsByTagName('input')[0].value = 'DELETE'; this.parentNode.parentNode.style.display = 'none'; return false;">
           <input type="hidden" value="" name="#{@object_name}[delete]" />
-          #{helpers.send(:image_tag, helpers.send(:url_for, :escape => false, :action => :asset, :path => "images/auto_admin/icon_deletelink.gif" ), :alt => ' [X]', :title => 'Delete')}
+          #{helpers.send(:image_tag, helpers.send(:url_for, :action => :asset, :path => %w(images auto_admin icon_deletelink.gif)), :alt => ' [X]', :title => 'Delete')}
         </a>
         foo
       end

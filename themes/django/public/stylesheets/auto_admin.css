@@ -1,5 +1,5 @@
-@import url(stylesheets/auto_admin_global.css);
-@import url(stylesheets/auto_admin_changelists.css);
+@import url(auto_admin_global.css);
+@import url(auto_admin_changelists.css);
 
 #branding h1 a { color: #f4f379 !important; }
 th.boolean, td.boolean { text-align: center; }

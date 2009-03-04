@@ -47,7 +47,7 @@ module AutoAdminHelper
     cell_content = case column && column.type
       when :boolean
         value = value ? 'Yes' : 'No'
-        image_tag url_for( :escape => false, :action => :asset, :path => "images/auto_admin/icon-#{value.downcase}.gif" ), :alt => value, :title => value
+        image_tag url_for(:action => :asset, :path => %W(images auto_admin icon-#{value.downcase}.gif)), :alt => value, :title => value
       else
         h value
       end
