@@ -308,7 +308,7 @@ reasons.
 
 * Simple helpers that just delegate to the ActionView's FormBuilder:
   +hidden_field+, +date_select+, +datetime_select+, +text_field+, +text_area+,
-  +check_box+, +secure_password+.
+  +check_box+, +secure_password+, +file_field+.
 
 * +select+ and +radio_group+ operate in basically the same way; they both
   provide a method of selecting one out of several choices (ignoring
@@ -386,7 +386,7 @@ reasons.
 * None of the following actually work, but they're defined, waiting for me to
   come back and write them. +html_area+ will eventually use FCKeditor by
   default, and presumably the file/image fields will delegate to file_column:
-  +html_area+, +file_field+, +image_field+, +static_file+.
+  +html_area+, +image_field+, +static_file+.
 
 
 == How does it work? - Part II, Themes

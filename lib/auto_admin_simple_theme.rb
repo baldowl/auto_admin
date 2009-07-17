@@ -347,6 +347,8 @@ module AutoAdmin
       link_to( caption, url )
     end
     def file_field(field, options = {})
+      common_option_translations! options
+      super
     end
     def image_field(field, options = {})
     end
