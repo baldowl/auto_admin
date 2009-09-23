@@ -9,9 +9,9 @@ class ActionController::Routing::RouteSet
     draw_without_admin do |map|
       prefix = AutoAdmin::AutoAdminConfiguration.url_prefix rescue 'admin'
       map.connect "#{prefix}", :controller => 'auto_admin', :action => 'index'
+      map.connect "#{prefix}/asset/*path", :controller => 'auto_admin', :action => 'asset'
       map.connect "#{prefix}/-/:action/:id", :controller => 'auto_admin', :action => 'index',
         :requirements => { :model => nil }
-      map.connect "#{prefix}/asset/*path", :controller => 'auto_admin', :action => 'asset'
 
       map.connect "#{prefix}/:model/:action", :controller => 'auto_admin', :action => 'list', 
         :requirements => { :action => /[^0-9].*/, :id => nil }
