@@ -60,7 +60,7 @@ module AutoAdminDjangoTheme
           options[:class] << ' vTextField'
           options[:size] ||= 50
         end
-      when :text_area
+      when :text_area, :html_area
         options[:class] << ' vLargeTextField'
       when :check_box
         options[:class] << ' vCheckboxField'

@@ -297,6 +297,11 @@ module AutoAdmin
     end
     def html_area(field, options = {})
       common_option_translations! options
+      if AutoAdmin::AutoAdminConfiguration.use_fckeditor_plugin
+        object_helper :fckeditor_textarea, field, options
+      else
+        object_helper :text_area, field, options
+      end
     end
     def select(field, options = {}, html_options = {})
       common_option_translations! options

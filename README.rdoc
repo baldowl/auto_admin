@@ -118,6 +118,10 @@ For the optional export mechanism you also need:
 
 * the <b>pdf-writer</b> gem for the PDF export module.
 
+To use the +html_area+ helper with FCKEditor you need an extra
+plugin[http://rubyforge.org/projects/fckeditorp/]; see its documentation for
+further instructions.
+
 
 == How do I use it?
 
@@ -144,6 +148,9 @@ lines to the bottom of your environment.rb or in an initializer file:
 
     # The optional export mechanism.
     admin.save_as = %w(pdf csv)
+
+    # Turn on the use of FCKEditor.
+    admin.use_fckeditor_plugin = true
   end
 
 Having done that, you can now (re-)start <tt>script/server</tt>, and navigate
@@ -377,10 +384,12 @@ object for a list view, for fairly obvious reasons.
     f.hyperlink :picture, :url => f.object.picture.url,
       :link_text => 'The picture'
 
+* +html_area+ use FCKEditor if the support has been explicitly turned on,
+  otherwise it delegates to +text_area+.
+
 * None of the following actually work, but they're defined, waiting for me to
-  come back and write them. +html_area+ will eventually use FCKeditor by
-  default, and presumably the file/image fields will delegate to file_column:
-  +html_area+, +image_field+, +static_file+.
+  come back and write them. Presumably the image fields will delegate to
+  file_column: +image_field+, +static_file+.
 
 
 == How does it work? - Part II, Themes

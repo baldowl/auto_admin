@@ -119,6 +119,10 @@ module AutoAdminConfiguration
   # Returns the list of active export formats.
   def self.save_as; @@save_as_formats ||= []; end
 
+  # Turn on/off the use of FCKEditor.
+  def self.use_fckeditor_plugin=(flag); @@use_fckeditor = flag; end
+  def self.use_fckeditor_plugin; @@use_fckeditor ||= false; end
+
   # Turns a simple string into the model class.
   def self.model name
     Object.const_get( name.to_s.camelcase )
