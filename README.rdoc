@@ -337,7 +337,7 @@ object for a list view, for fairly obvious reasons.
   generally-applicable choice (for example, it favours a +select+ over a
   +radio_group+ for a +belongs_to+ association).
 
-* +static_image+ sports a number of options used to build an hash suitable for
+* +static_image+ sports a number of options used to build a hash suitable for
   the +tag+ helper responsible for the creation of final <tt><img></tt> tag:
 
   * <tt>:controller</tt> (default "auto_admin") and <tt>:action</tt> (default
@@ -355,8 +355,8 @@ object for a list view, for fairly obvious reasons.
   Everything else is passed as is to the +tag+ helper (so one could use
   <tt>:style</tt> or <tt>:class</tt> to alter the looks of <tt><img></tt>).
   This helper accepts a block, with a single parameter (this object), which
-  can be used to return an hash to be merged into the options that are about
-  to be passed to the tag helper.
+  can be used to return a hash to be merged into the options that are about to
+  be passed to the tag helper.
 
 * +text_field_with_auto_complete+ provides a simple text field with
   autocompletion delegating all the work to the homonymous ActionView's
@@ -385,7 +385,13 @@ object for a list view, for fairly obvious reasons.
       :link_text => 'The picture'
 
 * +html_area+ use FCKEditor if the support has been explicitly turned on,
-  otherwise it delegates to +text_area+.
+  otherwise it delegates to +text_area+; when using FCKEditor, you can pass a
+  hash of options down to the editor:
+
+    f.html_area :content, :toolbarSet => 'MyStyle', :height => '300px'
+
+  See the FCKEditor plugin[http://rubyforge.org/projects/fckeditorp/]'s
+  documentation.
 
 * None of the following actually work, but they're defined, waiting for me to
   come back and write them. Presumably the image fields will delegate to
