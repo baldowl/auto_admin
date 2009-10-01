@@ -300,7 +300,8 @@ module AutoAdmin
       if AutoAdmin::AutoAdminConfiguration.use_fckeditor_plugin
         # We cannot use object_helper because of the fckeditor_textarea's
         # implementation details.
-        @template.send :fckeditor_textarea, 'object', field, options
+        @template.instance_variable_set "@#{model_name}", @object
+        @template.send :fckeditor_textarea, model_name, field, options
       else
         object_helper :text_area, field, options
       end
