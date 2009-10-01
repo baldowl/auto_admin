@@ -298,7 +298,9 @@ module AutoAdmin
     def html_area(field, options = {})
       common_option_translations! options
       if AutoAdmin::AutoAdminConfiguration.use_fckeditor_plugin
-        object_helper :fckeditor_textarea, field, options
+        # We cannot use object_helper because of the fckeditor_textarea's
+        # implementation details.
+        @template.send :fckeditor_textarea, 'object', field, options
       else
         object_helper :text_area, field, options
       end
@@ -569,4 +571,3 @@ module AutoAdminSimpleTheme
   class TableBuilder < AutoAdmin::TableBuilder(FormBuilder)
   end
 end
-
