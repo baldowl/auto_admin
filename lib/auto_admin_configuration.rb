@@ -62,7 +62,10 @@ module AutoAdminConfiguration
   #   end
   def self.primary_objects= new_value; @@primary_objects = new_value; end
 
-  def self.admin_model; @@admin_model ||= nil; end
+  def self.admin_model
+    @@admin_model ||= nil
+    @@admin_model ? model(@@admin_model) : nil
+  end
 
   # Set the application model used to authenticate the users. Use it as:
   #
