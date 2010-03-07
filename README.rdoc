@@ -498,3 +498,17 @@ haven't gotten around to doing that, and am now quite intruiged by the
 approach taken by Streamlined -- adding a new type of class. Any such move is
 primarily aimed at solving a problem I'm not yet sufferring, though, so for
 now it's just a topic to ponder.
+
+
+== Contributing
+
+If you want to help:
+
+* fork the project[http://github.com/baldowl/auto_admin] on GitHub;
+* work in a topic branch;
+* write your additions/bug fixes;
+* commit;
+* send me a pull request for the topic branch.
+
+If you have any issue, please post them on the {project's issue
+list}[http://github.com/baldowl/auto_admin] on GitHub.
