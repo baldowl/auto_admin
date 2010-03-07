@@ -459,7 +459,7 @@ EVAL
 
       # Assembles the single child's fieldset.
       def build_object(builder, obj, idx, caption)
-        builder.inner_fields_for( field.to_s + '_' + idx, obj ) do |inner|
+        builder.inner_fields_for( field.to_s + '_' + idx.to_s, obj ) do |inner|
           inner.fieldset( :fields, caption ) do
             yield inner if block_given?
             proc.call( inner ) if proc
