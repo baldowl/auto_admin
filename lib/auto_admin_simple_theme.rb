@@ -231,6 +231,7 @@ module AutoAdmin
     def table_fields_for(inner_object_name, inner_object, extra_options={}, &proc)
       options = @options.dup
       options[:inner_builder] = options.delete(:table_builder)
+      # Superfluous since Rails 2.2.2; let's keep it for 2.1.*.
       options[:binding] ||= @proc.binding
       options.update extra_options
       @template.fields_for( "#{@object_name}_#{inner_object_name}", inner_object, @template, options ) do |i|

@@ -1,8 +1,14 @@
 class DeclarativeFormBuilder
   def initialize(object_name, object, erb_self, options, proc)
+    # @binding is superfluous since Rails 2.2.2; let's keep it for 2.1.*.
     @erb, @binding, @options = erb_self, options[:binding] || proc.binding, options
     @inner = (options[:inner_builder] || ActionView::Helpers::FormBuilder).new(object_name, object, erb_self, options, proc)
-    @erb.concat("\n", @binding)
+    # concat()'s second argument is deprecated since Rails 2.2.2.
+    if @erb.method(:concat).arity == 2
+      @erb.concat("\n", @binding)
+    else
+      @erb.concat("\n")
+    end
   end
   %w(object inner_fields_for table_fields_for with_object).each do |meth|
     class_eval <<-end_src, __FILE__, __LINE__
@@ -29,6 +35,13 @@ class DeclarativeFormBuilder
   end
   def buffer!(content)
     pre = @options[:indent] ? ('  ' * @options[:indent]) : ''
-    @erb.concat(pre + content + "\n", @binding) if content && content != ''
+    if content && content != ''
+      # concat()'s second argument is deprecated since Rails 2.2.2.
+      if @erb.method(:concat).arity == 2
+        @erb.concat(pre + content + "\n", @binding)
+      else
+        @erb.concat(pre + content + "\n")
+      end
+    end
   end
 end
