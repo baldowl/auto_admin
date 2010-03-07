@@ -56,12 +56,13 @@ your users, this probably isn't for you.
 
 == Where is it?
 
-The public git repository is hosted by Github[http://github.com] and can be
+The public Git repository is hosted by Github[http://github.com] and can be
 reached starting from http://github.com/baldowl/auto_admin
 
 I cannot stress enough that this is just a fork of the original code written
-by Matthew Draper; if you prefer the original version, then get it from the
-Subversion repository at http://svn.trebex.net/auto-admin/trunk/auto-admin
+by Matthew Draper; the original code was available from the Subversion
+repository at http://svn.trebex.net/auto-admin/trunk/auto-admin but you can
+get it also from this Git repository checking out the +matthew+ tag.
 
 
 == What does it assume?
